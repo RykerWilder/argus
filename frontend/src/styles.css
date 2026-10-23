@@ -2118,8 +2118,11 @@ a.icon-btn {
   font-size: 13px;
   line-height: 1.55;
   resize: none;
-  white-space: pre;
-  overflow: auto;
+  /* le righe lunghe vanno a capo: nessuna barra di scorrimento orizzontale */
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .mail-input textarea:focus {
