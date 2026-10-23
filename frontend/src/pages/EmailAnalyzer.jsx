@@ -181,7 +181,7 @@ export default function EmailAnalyzer() {
                     onKeyDown={(e) => {
                       if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) analyze();
                     }}
-                    placeholder={"Paste the email headers here…\n\nReceived: from mail.example.com (mail.example.com [203.0.113.10])\n        by mx.yourcompany.com with ESMTPS id …\nAuthentication-Results: …\nFrom: …"}
+                    placeholder="Paste the email headers here…"
                     spellCheck="false"
                     autoComplete="off"
                     className="mono"
