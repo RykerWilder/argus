@@ -1,24 +1,29 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse
 from dotenv import load_dotenv
 
 load_dotenv()
 
+from docs_theme import render_docs  # noqa: E402
 from routers import abuseipdb, domain_whois, email_analyzer, fqdn, iptracker, proxycheck, virustotal, whois  # noqa: E402
 
-app = FastAPI(title="Argus API", version="2.1.0")
+# /docs è servito da docs_theme.py, con lo stesso stile del frontend.
+app = FastAPI(title="Argus API", version="2.1.0", docs_url=None)
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Nessun CORS: il frontend chiama /api sulla propria origine (nginx in Docker,
+# proxy di Vite in sviluppo), quindi i siti terzi non possono usare le chiavi API
+# di Argus dal browser dell'utente.
 
 
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+
+@app.get("/docs", include_in_schema=False)
+def docs(request: Request) -> HTMLResponse:
+    root_path = request.scope.get("root_path", "").rstrip("/")
+    return HTMLResponse(render_docs(root_path + app.openapi_url, title="API docs"))
 
 
 # IP: ogni sorgente riceve {"ip": "..."}. Il frontend le interroga in parallelo

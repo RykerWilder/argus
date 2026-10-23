@@ -1,0 +1,1102 @@
+/* Argus API docs: stesso linguaggio visivo del frontend (frontend/src/styles.css).
+   Nero caldo, un solo accento mint, Geist + Geist Mono, angoli netti, linee da 1px.
+   Tutte le regole di Swagger UI sono sotto #swagger-ui: lo specificity dell'id
+   batte quello del CSS di Swagger, quindi non servono !important (tranne dove
+   Swagger stesso li usa). */
+
+:root {
+  --bg: #151515;
+  --bg-raised: #1b1b1b;
+  --line: #2b2b2b;
+  --line-soft: #202020;
+  --text: #f3f3f0;
+  --muted: #8f8f8a;
+  --dim: #5e5e5a;
+  --accent: #3dffc5;
+  --accent-ink: #151515;
+  --warn: #f6b54b;
+  --danger: #ff6b4f;
+
+  --sans: "Geist", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  --gutter: clamp(16px, 2.6vw, 40px);
+  --grid: 72px;
+
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  background: var(--bg);
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-color: var(--bg);
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.028) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.028) 1px, transparent 1px);
+  background-size: var(--grid) var(--grid);
+  background-position: calc(var(--gutter) - 1px) 0;
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.page > main {
+  flex: 1;
+  padding: 0 var(--gutter) 64px;
+}
+
+/* ── Header e footer (come nel frontend) ────────────── */
+
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 22px var(--gutter);
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--text);
+  text-decoration: none;
+  font-size: 24px;
+  letter-spacing: -0.03em;
+}
+
+.logo__mark {
+  color: var(--muted);
+}
+
+.site-header__nav {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  font-family: var(--mono);
+  font-size: 14px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.bracket {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7em;
+  padding: 4px 0;
+  color: var(--accent);
+  font-family: var(--mono);
+  font-size: 14px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.bracket__label {
+  transition: color 120ms ease;
+}
+
+.bracket:hover .bracket__label {
+  color: var(--text);
+}
+
+.site-footer {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 16px;
+  margin-top: 48px;
+  padding: 22px var(--gutter);
+  border-top: 1px solid var(--line-soft);
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+}
+
+.site-footer strong {
+  color: var(--text);
+  font-weight: 400;
+}
+
+.site-footer__credit {
+  text-align: center;
+}
+
+.site-footer__motto {
+  justify-self: end;
+  text-align: right;
+}
+
+@media (max-width: 720px) {
+  .site-footer {
+    grid-template-columns: 1fr;
+    justify-items: start;
+    gap: 6px;
+  }
+
+  .site-footer__credit,
+  .site-footer__motto {
+    justify-self: start;
+    text-align: left;
+  }
+}
+
+/* ── Swagger UI: base ───────────────────────────────── */
+
+#swagger-ui {
+  width: min(1100px, 100%);
+  margin: 0 auto;
+  padding-top: clamp(24px, 6vh, 64px);
+  color: var(--text);
+}
+
+#swagger-ui .swagger-ui .wrapper,
+#swagger-ui .wrapper {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Tipografia, colori e forme di partenza per tutto Swagger. Gli elementi che
+   devono distinguersi sono ridefiniti più sotto. */
+#swagger-ui * {
+  font-family: var(--sans);
+  font-weight: 400;
+  color: inherit;
+  border-radius: 0;
+  box-shadow: none;
+  text-shadow: none;
+}
+
+#swagger-ui svg {
+  fill: currentColor;
+}
+
+#swagger-ui b,
+#swagger-ui strong {
+  font-weight: 500;
+}
+
+#swagger-ui a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+#swagger-ui a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+#swagger-ui a.nostyle,
+#swagger-ui a.nostyle:hover {
+  color: inherit;
+  text-decoration: none;
+}
+
+#swagger-ui .markdown p,
+#swagger-ui .markdown pre,
+#swagger-ui .renderedMarkdown p,
+#swagger-ui .renderedMarkdown pre {
+  margin: 0 0 0.6em;
+}
+
+#swagger-ui .markdown p:last-child,
+#swagger-ui .renderedMarkdown p:last-child {
+  margin-bottom: 0;
+}
+
+#swagger-ui .markdown code,
+#swagger-ui .renderedMarkdown code {
+  padding: 2px 6px;
+  border: 1px solid var(--line);
+  background: var(--bg-raised);
+  font-family: var(--mono);
+  font-size: 0.88em;
+  color: var(--text);
+}
+
+/* ── Intestazione dell'API ──────────────────────────── */
+
+#swagger-ui .information-container {
+  padding: 0;
+}
+
+#swagger-ui .info {
+  margin: 0 0 36px;
+}
+
+#swagger-ui .info .title {
+  margin: 0;
+  font-weight: 300;
+  font-size: clamp(36px, 4.4vw, 60px);
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+}
+
+#swagger-ui .info .title small,
+#swagger-ui .info .title .version-stamp {
+  position: static;
+  display: inline-block;
+  margin-left: 14px;
+  padding: 2px 8px;
+  border: 1px solid var(--line);
+  background: none;
+  vertical-align: middle;
+}
+
+#swagger-ui .info .title small pre,
+#swagger-ui .info .title .version {
+  margin: 0;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+#swagger-ui .info p,
+#swagger-ui .info li,
+#swagger-ui .info table,
+#swagger-ui .info .base-url {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 18px;
+}
+
+#swagger-ui .info .base-url {
+  font-family: var(--mono);
+  font-size: 14px;
+}
+
+#swagger-ui .info a {
+  font-size: inherit;
+}
+
+#swagger-ui .scheme-container {
+  margin: 0 0 8px;
+  padding: 0;
+  background: none;
+  border: 0;
+}
+
+#swagger-ui .scheme-container .schemes {
+  gap: 16px;
+}
+
+#swagger-ui .scheme-container:not(:has(select, button)) {
+  display: none;
+}
+
+/* ── Sezioni (tag) ──────────────────────────────────── */
+
+#swagger-ui .opblock-tag-section {
+  margin-bottom: 8px;
+}
+
+#swagger-ui .opblock-tag {
+  margin: 0 0 12px;
+  padding: 18px 0 14px;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 24px;
+  letter-spacing: -0.02em;
+  transition: none;
+}
+
+#swagger-ui .opblock-tag:hover {
+  background: none;
+}
+
+#swagger-ui .opblock-tag small {
+  margin-left: 16px;
+  color: var(--muted);
+  font-size: 15px;
+  letter-spacing: 0;
+}
+
+#swagger-ui .opblock-tag svg,
+#swagger-ui section.models h4 svg {
+  color: var(--muted);
+}
+
+#swagger-ui .expand-operation,
+#swagger-ui .expand-methods {
+  background: none;
+  border: 0;
+}
+
+/* ── Operazioni ─────────────────────────────────────── */
+
+#swagger-ui .opblock {
+  margin: 0 0 8px;
+  border: 1px solid var(--line);
+  background: rgba(21, 21, 21, 0.85);
+}
+
+#swagger-ui .opblock.is-open {
+  background: rgba(27, 27, 27, 0.85);
+}
+
+#swagger-ui .opblock .opblock-summary {
+  align-items: center;
+  gap: 14px;
+  padding: 8px 16px;
+  border: 0;
+}
+
+#swagger-ui .opblock .opblock-summary:has(> .opblock-summary-control) {
+  padding: 0;
+}
+
+#swagger-ui .opblock .opblock-summary-control {
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  background: none;
+  border: 0;
+}
+
+#swagger-ui .opblock.is-open .opblock-summary {
+  border-bottom: 1px solid var(--line);
+}
+
+#swagger-ui .opblock .opblock-summary-method {
+  min-width: 72px;
+  padding: 4px 10px;
+  border: 1px solid currentColor;
+  background: none;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+#swagger-ui .opblock-post .opblock-summary-method { color: var(--accent); }
+#swagger-ui .opblock-put .opblock-summary-method,
+#swagger-ui .opblock-patch .opblock-summary-method { color: var(--warn); }
+#swagger-ui .opblock-delete .opblock-summary-method { color: var(--danger); }
+#swagger-ui .opblock-head .opblock-summary-method,
+#swagger-ui .opblock-options .opblock-summary-method { color: var(--muted); }
+
+#swagger-ui .opblock .opblock-summary-path,
+#swagger-ui .opblock .opblock-summary-path a {
+  font-family: var(--mono);
+  font-size: 15px;
+  letter-spacing: 0;
+  color: var(--text);
+}
+
+#swagger-ui .opblock .opblock-summary-path__deprecated {
+  text-decoration: line-through;
+}
+
+#swagger-ui .opblock .opblock-summary-description,
+#swagger-ui .opblock .opblock-summary-operation-id {
+  color: var(--muted);
+  font-size: 15px;
+}
+
+#swagger-ui .opblock .opblock-summary-operation-id {
+  font-family: var(--mono);
+  font-size: 13px;
+}
+
+#swagger-ui .opblock.opblock-deprecated {
+  opacity: 0.6;
+}
+
+#swagger-ui .opblock .opblock-body {
+  background: none;
+}
+
+#swagger-ui .opblock .opblock-description-wrapper,
+#swagger-ui .opblock .opblock-external-docs-wrapper,
+#swagger-ui .opblock .opblock-title_normal {
+  padding: 16px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+#swagger-ui .opblock .opblock-description-wrapper p,
+#swagger-ui .opblock .opblock-external-docs-wrapper p,
+#swagger-ui .opblock .opblock-title_normal p {
+  color: inherit;
+  font-size: inherit;
+}
+
+#swagger-ui .opblock .opblock-section-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 0;
+  padding: 12px 16px;
+  background: none;
+  border-top: 1px solid var(--line-soft);
+  border-bottom: 1px solid var(--line-soft);
+}
+
+#swagger-ui .opblock .opblock-section-header h4,
+#swagger-ui .opblock .opblock-section-header label,
+#swagger-ui .opblock .opblock-section-header label span {
+  margin: 0;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+#swagger-ui .opblock .opblock-section-header h4 {
+  flex: 1;
+}
+
+#swagger-ui .opblock .tab-header .tab-item.active h4 span::after {
+  background: var(--accent);
+}
+
+#swagger-ui .responses-inner {
+  padding: 16px;
+}
+
+#swagger-ui .responses-inner h4,
+#swagger-ui .responses-inner h5 {
+  margin: 0 0 8px;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+#swagger-ui .table-container {
+  padding: 0 16px 16px;
+}
+
+/* ── Tabelle ────────────────────────────────────────── */
+
+#swagger-ui table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+#swagger-ui table thead tr td,
+#swagger-ui table thead tr th {
+  padding: 10px 12px 10px 0;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-align: left;
+}
+
+#swagger-ui table tbody tr td {
+  padding: 14px 12px 14px 0;
+  border: 0;
+  border-bottom: 1px solid var(--line-soft);
+  vertical-align: top;
+}
+
+#swagger-ui table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+#swagger-ui .parameter__name {
+  margin-bottom: 4px;
+  font-family: var(--mono);
+  font-size: 14px;
+  color: var(--text);
+}
+
+#swagger-ui .parameter__name.required span {
+  color: var(--danger);
+}
+
+#swagger-ui .parameter__name.required::after {
+  padding: 0 0 0 8px;
+  color: var(--danger);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+#swagger-ui .parameter__type,
+#swagger-ui .parameter__deprecated,
+#swagger-ui .parameter__in,
+#swagger-ui .parameter__extension,
+#swagger-ui .prop-format {
+  color: var(--dim);
+  font-family: var(--mono);
+  font-size: 12px;
+  font-style: normal;
+}
+
+#swagger-ui .parameter__type {
+  color: var(--muted);
+}
+
+#swagger-ui .parameters-col_description p,
+#swagger-ui .parameters-col_description .markdown,
+#swagger-ui .response-col_description,
+#swagger-ui .response-col_description .markdown {
+  color: var(--muted);
+  font-size: 15px;
+}
+
+#swagger-ui .parameters-col_description input[type="text"] {
+  width: 100%;
+  max-width: 420px;
+}
+
+#swagger-ui .response-col_status,
+#swagger-ui .response-col_links {
+  font-family: var(--mono);
+  font-size: 14px;
+  color: var(--text);
+}
+
+#swagger-ui .responses-table.live-responses-table .response-col_status,
+#swagger-ui .responses-table .response-col_status {
+  white-space: nowrap;
+}
+
+#swagger-ui .response-col_description__inner div.markdown,
+#swagger-ui .response-col_description__inner div.renderedMarkdown {
+  color: var(--muted);
+}
+
+#swagger-ui .response-controls {
+  padding-top: 8px;
+}
+
+#swagger-ui .response-control-media-type--accept-controller select {
+  border-color: var(--line);
+}
+
+#swagger-ui .response-control-media-type__accept-message {
+  color: var(--accent);
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+/* ── Campi di input ─────────────────────────────────── */
+
+#swagger-ui input[type="text"],
+#swagger-ui input[type="email"],
+#swagger-ui input[type="password"],
+#swagger-ui input[type="search"],
+#swagger-ui input[type="number"],
+#swagger-ui input[type="file"],
+#swagger-ui textarea,
+#swagger-ui select {
+  padding: 9px 12px;
+  border: 1px solid var(--line);
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 14px;
+  letter-spacing: 0;
+}
+
+#swagger-ui textarea {
+  min-height: 110px;
+  line-height: 1.6;
+}
+
+#swagger-ui input::placeholder,
+#swagger-ui textarea::placeholder {
+  color: var(--dim);
+}
+
+#swagger-ui input[type="text"]:focus,
+#swagger-ui input[type="email"]:focus,
+#swagger-ui input[type="password"]:focus,
+#swagger-ui input[type="search"]:focus,
+#swagger-ui input[type="number"]:focus,
+#swagger-ui textarea:focus,
+#swagger-ui select:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-color: var(--accent);
+}
+
+#swagger-ui input[disabled],
+#swagger-ui textarea[disabled],
+#swagger-ui select[disabled] {
+  background-color: var(--bg-raised);
+  color: var(--dim);
+  cursor: not-allowed;
+}
+
+#swagger-ui input.invalid,
+#swagger-ui textarea.invalid,
+#swagger-ui select.invalid {
+  border-color: var(--danger);
+  background-color: rgba(255, 107, 79, 0.08);
+}
+
+#swagger-ui input[type="checkbox"],
+#swagger-ui input[type="radio"] {
+  accent-color: var(--accent);
+}
+
+#swagger-ui select {
+  appearance: none;
+  padding-right: 36px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%238f8f8a' stroke-width='1.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px 8px;
+  cursor: pointer;
+}
+
+#swagger-ui label {
+  margin: 0 0 6px;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+#swagger-ui .body-param__text {
+  width: 100%;
+}
+
+/* ── Bottoni ────────────────────────────────────────── */
+
+#swagger-ui .btn {
+  min-height: 36px;
+  padding: 7px 18px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 120ms ease, background-color 120ms ease;
+}
+
+#swagger-ui .btn:hover {
+  border-color: var(--muted);
+  box-shadow: none;
+}
+
+#swagger-ui .btn.execute {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+#swagger-ui .btn.execute:hover {
+  border-color: #73ffd5;
+  background: #73ffd5;
+}
+
+#swagger-ui .btn.cancel,
+#swagger-ui .btn.cancel:hover {
+  border-color: var(--danger);
+  color: var(--danger);
+  background: transparent;
+}
+
+#swagger-ui .btn.authorize,
+#swagger-ui .btn.modal-btn.auth {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-color: var(--accent);
+  color: var(--accent);
+  line-height: 1;
+}
+
+#swagger-ui .btn.authorize svg {
+  fill: var(--accent);
+}
+
+#swagger-ui .btn.authorize:hover {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+#swagger-ui .btn.authorize:hover svg {
+  fill: var(--accent-ink);
+}
+
+#swagger-ui .btn:disabled,
+#swagger-ui .btn.disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+#swagger-ui .execute-wrapper {
+  padding: 16px;
+}
+
+#swagger-ui .btn-group {
+  display: flex;
+  gap: 12px;
+  padding: 0 16px 16px;
+}
+
+#swagger-ui .btn-group .btn:first-child,
+#swagger-ui .btn-group .btn:last-child {
+  border-radius: 0;
+}
+
+#swagger-ui .try-out__btn {
+  margin-left: 0;
+}
+
+#swagger-ui .authorization__btn {
+  padding: 0 16px;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+#swagger-ui .authorization__btn svg {
+  fill: var(--muted);
+}
+
+#swagger-ui .authorization__btn.locked svg {
+  fill: var(--accent);
+}
+
+/* ── Codice ─────────────────────────────────────────── */
+
+#swagger-ui .highlight-code {
+  position: relative;
+}
+
+#swagger-ui pre.microlight,
+#swagger-ui .opblock-body pre.microlight,
+#swagger-ui .highlight-code > .microlight,
+#swagger-ui .highlight-code > pre,
+#swagger-ui .curl-command .curl {
+  margin: 0;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  background: var(--bg) !important;
+  color: var(--text) !important;
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-all;
+  overflow-wrap: anywhere;
+}
+
+#swagger-ui pre.microlight *,
+#swagger-ui .highlight-code > pre *,
+#swagger-ui .curl-command .curl * {
+  background: none !important;
+  color: inherit !important;
+  font-family: var(--mono);
+  font-weight: 400;
+}
+
+#swagger-ui .curl-command {
+  margin-top: 16px;
+}
+
+#swagger-ui .curl-command h4 {
+  margin: 0 0 8px;
+}
+
+#swagger-ui .copy-to-clipboard {
+  right: 12px;
+  bottom: 12px;
+  background: var(--line);
+}
+
+#swagger-ui .copy-to-clipboard button {
+  filter: none;
+}
+
+/* ── Esempi e modelli ───────────────────────────────── */
+
+#swagger-ui .model-example {
+  margin-top: 0;
+}
+
+#swagger-ui .tab {
+  margin: 0 0 14px;
+  padding: 0;
+}
+
+#swagger-ui .tab li {
+  min-width: 0;
+  padding: 0 14px 0 0;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+#swagger-ui .tab li button.tablinks {
+  padding: 4px 0;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid transparent;
+  color: inherit;
+  font-family: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  cursor: pointer;
+}
+
+#swagger-ui .tab li.active {
+  color: var(--text);
+}
+
+#swagger-ui .tab li.active button.tablinks {
+  border-bottom-color: var(--accent);
+}
+
+#swagger-ui .tab li:first-of-type::after {
+  background: var(--line);
+}
+
+#swagger-ui .model-box,
+#swagger-ui .model-container {
+  background: none;
+}
+
+#swagger-ui section.models {
+  margin: 36px 0 0;
+  border: 1px solid var(--line);
+  background: rgba(21, 21, 21, 0.85);
+}
+
+#swagger-ui section.models.is-open h4 {
+  margin: 0;
+  border-bottom: 1px solid var(--line);
+}
+
+#swagger-ui section.models h4 {
+  padding: 18px 20px;
+  font-size: 24px;
+  letter-spacing: -0.02em;
+  cursor: pointer;
+}
+
+#swagger-ui section.models .model-container {
+  margin: 0;
+  padding: 0 20px;
+  border-top: 1px solid var(--line-soft);
+}
+
+#swagger-ui section.models .model-container:first-of-type {
+  border-top: 0;
+}
+
+#swagger-ui section.models .model-container:hover {
+  background: none;
+}
+
+#swagger-ui .model-title,
+#swagger-ui .model-title__text {
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 15px;
+}
+
+#swagger-ui .model,
+#swagger-ui .model-box {
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 13px;
+}
+
+/* il bottone che contiene il titolo "Schemas" eredita il corpo dell'h4 */
+#swagger-ui .models-control {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 0;
+  background: none;
+  border: 0;
+  font: inherit;
+  letter-spacing: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+#swagger-ui .model .property.primitive,
+#swagger-ui .model-hint,
+#swagger-ui .prop-format,
+#swagger-ui table.model tr.description {
+  color: var(--muted);
+}
+
+#swagger-ui .prop-type,
+#swagger-ui .prop-enum {
+  color: var(--accent);
+  font-family: var(--mono);
+}
+
+#swagger-ui table.model tbody tr td {
+  padding: 6px 12px 6px 0;
+  border: 0;
+}
+
+#swagger-ui .model-toggle::after,
+#swagger-ui .model-jump-to-path::after {
+  filter: invert(1) opacity(0.6);
+}
+
+/* ── Finestra "Authorize" ───────────────────────────── */
+
+#swagger-ui .dialog-ux .backdrop-ux {
+  background: rgba(21, 21, 21, 0.85);
+}
+
+#swagger-ui .dialog-ux .modal-ux {
+  border: 1px solid var(--line);
+  background: var(--bg-raised);
+  color: var(--text);
+}
+
+#swagger-ui .dialog-ux .modal-ux-header {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--line);
+}
+
+#swagger-ui .dialog-ux .modal-ux-header h3 {
+  font-size: 22px;
+  letter-spacing: -0.02em;
+}
+
+#swagger-ui .dialog-ux .modal-ux-header .close-modal {
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+#swagger-ui .dialog-ux .modal-ux-content {
+  padding: 20px;
+}
+
+#swagger-ui .dialog-ux .modal-ux-content p,
+#swagger-ui .dialog-ux .modal-ux-content h4,
+#swagger-ui .dialog-ux .modal-ux-content h4 code {
+  color: var(--muted);
+}
+
+#swagger-ui .auth-container {
+  border-bottom: 1px solid var(--line);
+}
+
+#swagger-ui .auth-btn-wrapper {
+  gap: 12px;
+}
+
+/* ── Errori e caricamento ───────────────────────────── */
+
+#swagger-ui .errors-wrapper {
+  margin: 16px;
+  padding: 12px 18px;
+  border: 1px solid var(--danger);
+  background: rgba(255, 107, 79, 0.08);
+}
+
+#swagger-ui .errors-wrapper hgroup h4,
+#swagger-ui .errors-wrapper .errors-wrapper .error-wrapper {
+  color: var(--danger);
+  font-family: var(--mono);
+  letter-spacing: 0.04em;
+}
+
+#swagger-ui .loading-container {
+  padding: 40px 0 60px;
+}
+
+#swagger-ui .loading-container .loading::after {
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+#swagger-ui .loading-container .loading::before {
+  border-color: var(--line);
+  border-top-color: var(--accent);
+}
+
+#swagger-ui .fallback {
+  color: var(--muted);
+}
+
+/* ── Schermi stretti ────────────────────────────────── */
+
+@media (max-width: 720px) {
+  #swagger-ui .opblock .opblock-summary-control {
+    flex-wrap: wrap;
+    gap: 8px 14px;
+  }
+
+  #swagger-ui .opblock .opblock-summary-description {
+    flex-basis: 100%;
+  }
+
+  #swagger-ui .btn-group {
+    flex-wrap: wrap;
+  }
+
+  .site-header__nav {
+    gap: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #swagger-ui *,
+  .bracket__label {
+    transition: none !important;
+    animation: none !important;
+  }
+}

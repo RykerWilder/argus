@@ -6,8 +6,10 @@ services:
     image: argus-backend
     container_name: argus-backend
     restart: unless-stopped
+    # Solo localhost: le chiamate al backend usano le chiavi API di .env,
+    # quindi la porta non deve essere raggiungibile dalla rete.
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     env_file:
       - .env
     networks:
@@ -21,8 +23,10 @@ services:
     image: argus-frontend
     container_name: argus-frontend
     restart: unless-stopped
+    # Solo localhost: nginx inoltra /api al backend, quindi chi raggiunge
+    # questa porta può usare le chiavi API di .env.
     ports:
-      - "5173:80"
+      - "127.0.0.1:5173:80"
     depends_on:
       - backend
     networks:
