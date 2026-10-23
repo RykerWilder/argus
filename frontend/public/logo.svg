@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 168 48" fill="none" aria-label="Argus">
+  <g fill="#8f8f8a">
+    <circle cx="8" cy="8" r="4.4"/><circle cx="24" cy="8" r="4.4"/><circle cx="40" cy="8" r="4.4"/>
+    <circle cx="8" cy="24" r="4.4"/><circle cx="40" cy="24" r="4.4"/>
+    <circle cx="8" cy="40" r="4.4"/><circle cx="24" cy="40" r="4.4"/><circle cx="40" cy="40" r="4.4"/>
+  </g>
+  <circle cx="24" cy="24" r="6.8" fill="#3dffc5"/>
+  <text x="64" y="34" fill="#f3f3f0" font-family="Geist, Helvetica, Arial, sans-serif" font-size="30" font-weight="400" letter-spacing="-0.9">Argus</text>
+</svg>
