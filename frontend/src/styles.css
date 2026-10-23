@@ -1129,9 +1129,56 @@ input {
 }
 
 .reports {
-  margin: 0 0 16px;
+  margin: 0;
   padding: 0;
   list-style: none;
+}
+
+/* Segnalazioni AbuseIPDB: riquadro ad altezza fissa che scorre al suo interno */
+.reports__count {
+  margin: 0 0 10px;
+  font-size: 13px;
+}
+
+.reports-scroll.is-scrollable {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 14px;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  scrollbar-width: thin;
+  scrollbar-color: #3d3d3b transparent;
+  /* sfumatura in basso: si capisce che c'è altro da scorrere */
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 28px), transparent);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 28px), transparent);
+}
+
+.reports-scroll--list.is-scrollable {
+  max-height: 440px;
+}
+
+.reports-scroll--day.is-scrollable {
+  max-height: 300px;
+}
+
+.reports-scroll.is-scrollable .reports li:last-child {
+  padding-bottom: 28px;
+}
+
+.reports-scroll:focus-visible {
+  outline-offset: 2px;
+}
+
+.reports-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.reports-scroll::-webkit-scrollbar-thumb {
+  background: #3d3d3b;
+}
+
+.reports-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--muted);
 }
 
 .reports li {
@@ -2564,6 +2611,10 @@ a.highlight__link:hover {
 }
 
 @media (max-width: 640px) {
+  .reports-scroll--list.is-scrollable {
+    max-height: 60vh;
+  }
+
   .mail-input textarea {
     min-height: 240px;
     padding: 16px;

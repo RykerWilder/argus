@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Bracket } from "./Header";
 import { countryName } from "../lib/countries";
 
 // Timeline dei report AbuseIPDB: una linea con i report per giorno.
@@ -185,7 +184,7 @@ export default function ReportTimeline({ daily, reports, received, total, days, 
       </div>
 
       {asList ? (
-        <ReportList reports={reports} />
+        <ReportList reports={reports} size="list" />
       ) : (
         <>
           <div className="timeline__chart" ref={wrapRef}>
@@ -265,7 +264,7 @@ export default function ReportTimeline({ daily, reports, received, total, days, 
                   Showing {selReports.length} of {sel.count}: AbuseIPDB only returns the most recent reports in full.
                 </p>
               )}
-              <ReportList reports={selReports} timeOnly />
+              <ReportList reports={selReports} timeOnly size="day" />
             </div>
           )}
         </>
@@ -274,12 +273,25 @@ export default function ReportTimeline({ daily, reports, received, total, days, 
   );
 }
 
-function ReportList({ reports, timeOnly = false }) {
-  const [open, setOpen] = useState(false);
-  const LIMIT = 10;
-  const shown = open ? reports : reports.slice(0, LIMIT);
+// Le segnalazioni scorrono dentro un riquadro ad altezza fissa: con centinaia di
+// report la pagina non si allunga. Si scorre con rotella, trackpad o tastiera.
+function ReportList({ reports, timeOnly = false, size = "list" }) {
+  const shown = reports;
+  const scrollable = reports.length > 3;
   return (
     <>
+      {scrollable && size === "list" && (
+        <p className="reports__count muted">
+          {plural(reports.length, "report")}
+          {reports.length > 4 && " · scroll to see them all"}
+        </p>
+      )}
+      <div
+        className={`reports-scroll reports-scroll--${size} ${scrollable ? "is-scrollable" : ""}`}
+        tabIndex={scrollable ? 0 : undefined}
+        role={scrollable ? "region" : undefined}
+        aria-label={scrollable ? `${plural(reports.length, "report")}, scrollable list` : undefined}
+      >
       <ol className="reports">
         {shown.map((r, i) => {
           const when = new Date(r.reportedAt);
@@ -311,11 +323,7 @@ function ReportList({ reports, timeOnly = false }) {
           );
         })}
       </ol>
-      {reports.length > LIMIT && (
-        <Bracket type="button" onClick={() => setOpen((o) => !o)}>
-          {open ? "Show fewer" : `Show all ${reports.length}`}
-        </Bracket>
-      )}
+      </div>
     </>
   );
 }
