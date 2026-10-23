@@ -5,78 +5,93 @@
 ![Python](https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white)
 
-<img src="https://github.com/RykerWilder/static_files/blob/main/argus.webp" alt="Splunk SOC Lab">
+<img src="https://github.com/RykerWilder/static_files/blob/main/argus.webp" alt="Argus">
 
-**Argus** is a self-hosted IP intelligence tool. Type an IP address into a single search field: the sources are queried in parallel, and once they have all answered you are taken to a report with the key facts highlighted, an interactive world map that highlights the country the address comes from, and one panel per source.
+Argus is a self-hosted threat intelligence lookup tool. It queries several public sources in parallel and merges the answers into a single report.
 
-## Sources
+- **IP addresses**: location, ISP and network block, VPN/proxy/Tor detection, abuse reports and connection type, with an interactive world map.
+- **Domains and URLs**: registration data, DNS records and reputation from 90+ security engines.
+- **Email headers**: analysis of a pasted header or an `.eml` / `.msg` file, with the route of the message on a map. Nothing is stored.
+- **History**: the latest searches, kept only in your browser.
 
-| Source | Endpoint | What it contributes | Key |
+Only the backend talks to the external services. The report contains no links to third-party sites.
+
+## Sources and limits
+
+| Source | Used for | API key | Limit (free tier) |
 | --- | --- | --- | --- |
-| **ip-api.com** | `POST /api/iptracker` | Location (country, region, city, coordinates, time zone) and connection (ISP, organization, ASN, reverse DNS, mobile/proxy/hosting flags) | none |
-| **RDAP WHOIS** (`ipwhois`) — *currently not shown in the report* | `POST /api/whois` | Who owns the address block: CIDR, range, network name and handle, registry, registration dates, registrant, abuse contacts | none |
-| **AbuseIPDB** | `POST /api/abuseipdb` | Abuse confidence score, reports, report categories, usage type, Tor flag | `ABUSEIPDB_API_KEY` |
-| **ProxyCheck.io** (v3) | `POST /api/proxycheck` | VPN / proxy / Tor / hosting / scraper / compromised detection, risk score, anonymizing service operator | `PROXYCHECK_API_KEY` (optional) |
+| [ip-api.com](https://ip-api.com/docs) | IP geolocation and connection details; geolocation of the hops in the email analyzer | None | 45 requests/minute per IP address. Batch endpoint (email analyzer): 15 requests/minute, up to 100 IPs each |
+| [ProxyCheck.io](https://proxycheck.io/api/) | VPN, proxy, Tor, hosting and risk score | Optional (`PROXYCHECK_API_KEY`) | 100 queries/day without a key, 1,000 queries/day with a free key |
+| [AbuseIPDB](https://docs.abuseipdb.com) | Abuse confidence score, reports, connection type | Required (`ABUSEIPDB_API_KEY`) | 1,000 requests/day (checks and reports combined) |
+| [Team Cymru](https://www.team-cymru.com/ip-asn-mapping) | BGP prefix (CIDR) of an IP, via DNS | None | No published limit. One DNS query per lookup |
+| [RDAP / WHOIS](https://about.rdap.org) | Domain registration, name servers, registrar | None | No fixed limit. Set by each registry |
+| [VirusTotal](https://docs.virustotal.com/reference/public-vs-premium-api) | Domain and URL reputation | Required (`VIRUSTOTAL_API_KEY`) | 4 requests/minute, 500 requests/day |
 
-RDAP WHOIS is disabled in the frontend (`enabled: false` in `frontend/src/lib/lookup.js`): the backend endpoint and the panel code are kept for later use, set it back to `true` to bring it back. The **Sources** page (`/sources`) lists every service Argus uses, with links to their websites.
+Notes on the limits:
 
-Every endpoint takes the same body: `{"ip": "8.8.8.8"}`. Private and reserved addresses are rejected with HTTP 422.
+- A single IP search sends one request to ip-api.com, ProxyCheck.io and AbuseIPDB. The lowest limit applies: in practice 1,000 IP searches per day with free keys.
+- A single domain or URL search can use up to 4 VirusTotal requests, so the per-minute limit can be reached by one search.
+- When a source answers HTTP 429 its panel reports the error and the rest of the report is still shown.
+- Results are cached for 10 minutes in the browser session, and repeated searches in that window do not consume quota. Failed sources are retried on the next search.
+- The free ip-api.com endpoint is HTTP only and not allowed for commercial use. The free VirusTotal API is not allowed for commercial use either.
+- Limits are set by the providers and may change. Check their documentation before relying on them.
 
-### How the report is organized
+## Installation
 
-The frontend (`frontend/src/lib/report.js`) builds the report from the four responses:
-
-- **Key facts**, highlighted in the accent colour (mint, #3DFFC5) at the top: location, ISP, connection type (Fixed Line ISP, Mobile ISP, Data Center… from AbuseIPDB) and VPN, including the VPN provider when ProxyCheck.io identifies it. The same rows are highlighted inside the source panels.
-- **Interactive map**: drag to pan, Ctrl/⌘ + scroll or pinch to zoom, double-click to zoom in, click a country to zoom to it, hover to see its name. Keyboard: `+`, `-`, arrows, `0` to reset.
-- **One panel per source**, in this order: ip-api.com, ProxyCheck.io, AbuseIPDB. A value already shown in an earlier panel is not repeated; if a later source reports a different value, the row appears marked "Differs from …".
-- If a source fails, its panel says why and the rest of the report still works.
-- The report contains no links to external sites; only the backend talks to the APIs.
-- The home page background is an animated canvas map with random connections between points: hover lights up nearby dots, clicking an empty area sends connections from the nearest point. It pauses when the tab is hidden and stays still if the system asks for reduced motion.
-
-## Run with Docker
+Requirements: Docker with the Compose plugin.
 
 ```bash
-cp .env.example .env        # add your AbuseIPDB key (ProxyCheck key is optional)
+git clone https://github.com/RykerWilder/argus.git
+cd argus
+cp .env.example .env
+```
+
+Edit `.env` and set the API keys (see [Configuration](#configuration)), then start the stack:
+
+```bash
 docker compose up -d --build
 ```
 
-- Frontend: http://localhost:5173
-- Backend API: http://localhost:8000 (docs at `/docs`, health check at `/health`)
+| Service | URL |
+| --- | --- |
+| Web interface | http://localhost:5173 |
+| API | http://localhost:8000 |
+| API docs | http://localhost:8000/docs |
 
-The frontend image downloads the country boundaries for the map (`world-atlas`, Natural Earth 1:110m, public domain) at build time, so the map works without calling a CDN at runtime.
+To stop it: `docker compose down`.
 
-## Run without Docker
+## Configuration
 
-```bash
-# backend
-cd backend && pip install -r requirements.txt && uvicorn main:app --reload --port 8000
+Set these variables in `.env`:
 
-# frontend (Vite proxies /api to localhost:8000; map data is loaded from jsDelivr)
-cd frontend && npm install && npm run dev
-```
+| Variable | Required | Where to get it |
+| --- | --- | --- |
+| `ABUSEIPDB_API_KEY` | For IP searches | [abuseipdb.com](https://www.abuseipdb.com) (free account) |
+| `PROXYCHECK_API_KEY` | No | [proxycheck.io](https://proxycheck.io) (raises the daily limit) |
+| `VIRUSTOTAL_API_KEY` | For domain and URL searches | [virustotal.com](https://www.virustotal.com) (free account) |
 
-## Project layout
+A missing key disables only the source that needs it. Never commit `.env`: it is already listed in `.gitignore`.
 
-```
-backend/
-  main.py                 FastAPI app, mounts the four routers
-  routers/common.py       shared IP validation
-  routers/iptracker.py    ip-api.com
-  routers/whois.py        RDAP
-  routers/abuseipdb.py    AbuseIPDB
-  routers/proxycheck.py   ProxyCheck.io v3
-frontend/src/
-  pages/Home.jsx          search field + live progress, redirects when all sources answered
-  pages/Result.jsx        report (/ip/:ip)
-  pages/Sources.jsx       list of services with links (/sources)
-  components/NetworkBackground.jsx  animated canvas map on the home page
-  components/WorldMap.jsx dot-matrix world map with highlighted country and marker
-  lib/lookup.js           parallel queries + session cache
-  lib/report.js           de-duplication and merge logic
-  lib/geo.js              TopoJSON decoding and Natural Earth projection (no dependencies)
-```
+## API
 
-## Notes
+Each source is a separate endpoint. IP endpoints accept `{"ip": "8.8.8.8"}`.
 
-- Only investigate IP addresses you are authorized to look into.
-- ip-api.com's free tier allows 45 requests per minute; AbuseIPDB and ProxyCheck have daily limits that depend on your plan.
+| Endpoint | Source |
+| --- | --- |
+| `POST /api/iptracker` | ip-api.com and Team Cymru |
+| `POST /api/proxycheck` | ProxyCheck.io |
+| `POST /api/abuseipdb` | AbuseIPDB |
+| `POST /api/whois` | RDAP for IP addresses (disabled in the interface) |
+| `POST /api/domain-whois` | RDAP / WHOIS for domains |
+| `POST /api/virustotal` | VirusTotal |
+| `POST /api/email/analyze` | Email header analyzer |
+
+Private and reserved IP addresses are rejected with HTTP 422. The full schema is available at `/docs`.
+
+## Usage notes
+
+Only investigate IP addresses, domains and messages you are authorized to look into.
+
+## License
+
+Released under the MIT License. See [LICENSE](LICENSE).
