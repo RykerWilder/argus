@@ -210,10 +210,14 @@ export function loadWorld() {
     for (const url of SOURCES) {
       try {
         const res = await fetch(url);
-        if (!res.ok) continue;
+        if (!res.ok) {
+          console.warn(`[argus] World map data: ${url} answered HTTP ${res.status}`);
+          continue;
+        }
         return buildModel(await res.json());
-      } catch {
+      } catch (err) {
         // prova la sorgente successiva
+        console.warn(`[argus] World map data: could not load ${url}`, err);
       }
     }
     throw new Error("World map data unavailable");
