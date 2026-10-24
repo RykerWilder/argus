@@ -1,6 +1,6 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import "./styles.css";
 
 import Home from "./pages/Home";
@@ -9,6 +9,7 @@ import Sources from "./pages/Sources";
 import History from "./pages/History";
 import DomainResult from "./pages/DomainResult";
 import EmailAnalyzer from "./pages/EmailAnalyzer";
+import NotFound from "./pages/NotFound";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -21,7 +22,7 @@ createRoot(document.getElementById("root")).render(
         <Route path="/sources" element={<Sources />} />
         <Route path="/history" element={<History />} />
         <Route path="/tools/email-headers" element={<EmailAnalyzer />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   </StrictMode>,

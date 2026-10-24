@@ -3114,6 +3114,112 @@ a.history__value:hover {
   }
 }
 
+/* ── 404 ────────────────────────────────────────────── */
+
+.notfound {
+  width: min(1100px, 100%);
+  margin: 0 auto;
+  padding-top: clamp(16px, 5vh, 56px);
+}
+
+/* lo zero di "404" è un occhio cliccabile: la sua iride segue il cursore */
+.notfound__eyebtn {
+  display: block;
+  width: min(560px, 100%);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.notfound__eyebtn:focus-visible {
+  outline-offset: 10px;
+}
+
+.notfound__digits {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.notfound__eye {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: notfound-idle 7s ease-in-out infinite;
+}
+
+.notfound__eye.is-blinking {
+  animation: notfound-blink 280ms ease-in-out;
+}
+
+.notfound__iris {
+  transition: transform 140ms ease-out;
+}
+
+@keyframes notfound-idle {
+  0%, 92%, 100% { transform: scaleY(1); }
+  95% { transform: scaleY(0.06); }
+}
+
+@keyframes notfound-blink {
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(0.06); }
+}
+
+.notfound__line {
+  max-width: 18em;
+  margin: 36px 0 0;
+  font-weight: 300;
+  font-size: clamp(28px, 3.6vw, 48px);
+  letter-spacing: -0.035em;
+  line-height: 1.1;
+}
+
+.notfound__lead {
+  margin: 14px 0 32px;
+  font-size: 18px;
+}
+
+.notfound__report {
+  width: min(640px, 100%);
+  margin: 0;
+  border: 1px solid var(--line);
+  font-size: 14px;
+}
+
+.notfound__report > div {
+  display: grid;
+  grid-template-columns: 160px minmax(0, 1fr);
+  gap: 16px;
+  padding: 14px 20px;
+  border-top: 1px solid var(--line);
+  background: rgba(21, 21, 21, 0.85);
+}
+
+.notfound__report > div:first-child {
+  border-top: 0;
+}
+
+.notfound__report dt {
+  color: var(--muted);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.notfound__report dd {
+  margin: 0;
+}
+
+@media (max-width: 640px) {
+  .notfound__report > div {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
