@@ -11,6 +11,9 @@ const API_KEYS_KEY = "argus:api-keys:v1";
 
 export const SETTINGS_EVENT = "argus:settings-changed";
 
+/** Intestazione con cui la chiave API salvata viaggia verso il backend (vedi backend/routers/common.py). */
+export const API_KEY_HEADER = "X-Argus-Api-Key";
+
 /** Servizi che accettano una chiave API, con le istruzioni mostrate nella pagina. */
 export const API_KEY_SERVICES = [
   {

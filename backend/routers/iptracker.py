@@ -1,8 +1,5 @@
 """IP Tracker: geolocalizzazione e connessione via ip-api.com (nessuna API key),
 più il prefisso BGP (CIDR) dell'IP via Team Cymru.
-
-I dati di registrazione della rete (RDAP) sono stati spostati nel router WHOIS,
-così ogni sorgente restituisce informazioni che le altre non hanno.
 """
 import asyncio
 
@@ -10,7 +7,7 @@ import httpx
 from fastapi import APIRouter, HTTPException
 
 from .bgp import bgp_prefix
-from .common import IPRequest, parse_ip
+from .common import IPRequest, parse_ip, require_public
 
 router = APIRouter()
 
@@ -25,7 +22,7 @@ IP_API_FIELDS = (
 @router.post("")
 async def track_ip(request: IPRequest):
     addr = parse_ip(request.ip)
-    ip = str(addr)
+    ip = require_public(addr)
 
     base = {
         "ip": ip,
@@ -35,12 +32,6 @@ async def track_ip(request: IPRequest):
         "isReserved": addr.is_reserved,
         "isGlobal": addr.is_global,
     }
-
-    if not addr.is_global:
-        raise HTTPException(
-            status_code=422,
-            detail="Private or reserved address: no public data available.",
-        )
 
     async def geo():
         async with httpx.AsyncClient() as client:

@@ -91,7 +91,6 @@ Each source is a separate endpoint. IP endpoints accept `{"ip": "8.8.8.8"}`.
 | `POST /api/iptracker` | ip-api.com and Team Cymru |
 | `POST /api/proxycheck` | ProxyCheck.io |
 | `POST /api/abuseipdb` | AbuseIPDB |
-| `POST /api/whois` | RDAP for IP addresses (disabled in the interface) |
 | `POST /api/domain-whois` | RDAP / WHOIS for domains |
 | `POST /api/virustotal` | VirusTotal |
 | `POST /api/email/analyze` | Email header analyzer |

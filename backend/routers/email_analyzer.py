@@ -13,7 +13,6 @@ from __future__ import annotations
 
 import base64
 import binascii
-import ipaddress
 import re
 from datetime import datetime, timezone
 from typing import Optional
@@ -24,6 +23,7 @@ from pydantic import BaseModel, Field
 
 from . import email_parse as ep
 from .domain_common import _extract
+from .ip_utils import is_public_ip
 
 router = APIRouter()
 
@@ -156,7 +156,7 @@ def origin_ip(hops: list[dict], parsed: ep.ParsedEmail) -> Optional[dict]:
             return {"ip": f["ip"], "host": f.get("rdns") or f.get("host"), "hop": hop["index"], "source": "Received"}
     for name in ("X-Originating-IP", "X-Sender-IP", "X-Client-IP"):
         ip = ep.find_ip(parsed.get(name) or "")
-        if ep.is_public(ip):
+        if is_public_ip(ip):
             return {"ip": str(ip), "host": None, "hop": None, "source": name}
     return None
 
@@ -405,13 +405,6 @@ def build_report(parsed: ep.ParsedEmail) -> dict:
     }
 
 
-def _is_public_ip(value: str) -> bool:
-    try:
-        return ipaddress.ip_address(value).is_global
-    except ValueError:
-        return False
-
-
 @router.post("/analyze")
 async def analyze(request: EmailRequest):
     try:
@@ -435,7 +428,7 @@ async def analyze(request: EmailRequest):
     for hop in report["hops"]:
         for side in ("from", "by"):
             ip = (hop.get(side) or {}).get("ip")
-            if ip and _is_public_ip(ip) and ip not in hop_ips:
+            if is_public_ip(ip) and ip not in hop_ips:
                 hop_ips.append(ip)
     if report["origin"] and report["origin"]["ip"] not in hop_ips:
         hop_ips.insert(0, report["origin"]["ip"])

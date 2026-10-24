@@ -1,11 +1,11 @@
-// Costruisce il report: un riquadro per ogni sorgente, nell'ordine di SOURCES.
+// Costruisce il report: un riquadro per ogni sorgente, nell'ordine di IP_SOURCES.
 // Un dato già mostrato da una sorgente precedente non viene ripetuto; se una
 // sorgente successiva riporta un valore diverso, la riga compare con la nota
 // "differs from …". I dati chiave (posizione, ISP, tipo di connessione, VPN)
 // sono evidenziati e riassunti in cima.
 
 import { countryName } from "./countries";
-import { ACTIVE_SOURCES, SOURCE_NAMES } from "./lookup";
+import { IP_SOURCES, SOURCE_NAMES } from "./lookup";
 
 const isEmpty = (v) =>
   v === null || v === undefined || v === "" || (Array.isArray(v) && v.length === 0);
@@ -121,14 +121,12 @@ export function buildReport(lookup) {
   const geo = ok("iptracker");
   const pc = ok("proxycheck");
   const abuse = ok("abuseipdb");
-  const who = ok("whois");
 
   const L = geo?.location || {};
   const C = geo?.connection || {};
   const PL = pc?.location || {};
   const PN = pc?.network || {};
   const PD = pc?.detections || {};
-  const WN = who?.network || {};
 
   const seen = new Map();
 
@@ -238,29 +236,6 @@ export function buildReport(lookup) {
     };
   }
 
-  // ── RDAP WHOIS ────────────────────────────────
-  {
-    const p = panelBuilder(seen, "whois");
-    if (who) {
-      p.add("Network block", WN.cidr, { key: "range", cmp: WN.cidr?.replace(/\s/g, ""), mono: true });
-      p.add("Address range", WN.startAddress && WN.endAddress ? `${WN.startAddress} – ${WN.endAddress}` : null, { mono: true });
-      p.add("Network name", WN.name, { mono: true });
-      p.add("Handle", WN.handle, { mono: true });
-      p.add("Allocation type", WN.type);
-      p.add("Registered to", who.registrant?.name, { key: "org" });
-      p.add("Registry", who.registry);
-      p.add("Registered in", formatCountry(WN.country || who.asnCountry));
-      p.add("Registered on", formatDate(WN.registered));
-      p.add("Last changed", formatDate(WN.lastChanged));
-      p.add("Parent network", WN.parentHandle, { mono: true });
-      p.add("Autonomous system", who.asn && [normalizeAsn(who.asn), who.asnDescription].filter(Boolean).join("  "), {
-        key: "asn", cmp: normalizeAsn(who.asn), mono: true,
-      });
-      p.add("Abuse contact", [...(who.abuse?.emails || []), ...(who.abuse?.phones || [])].join("\n"), { mono: true });
-    }
-    panels.whois = { rows: p.rows, remarks: WN.remarks || [] };
-  }
-
   // ── Dati chiave in evidenza ──────────────────
   const countryCode = (L.countryCode || PL.countryCode || abuse?.countryCode || "").toUpperCase() || null;
   const lat = num(L.lat) ?? num(PL.lat);
@@ -271,7 +246,7 @@ export function buildReport(lookup) {
 
   const isp = C.isp || abuse?.isp || PN.provider || null;
   const ispSource = C.isp ? "iptracker" : abuse?.isp ? "abuseipdb" : "proxycheck";
-  const asn = normalizeAsn(C.asn || PN.asn || who?.asn);
+  const asn = normalizeAsn(C.asn || PN.asn);
 
   let connection = null;
   if (abuse?.usageType) connection = { value: abuse.usageType, source: "abuseipdb" };
@@ -334,7 +309,7 @@ export function buildReport(lookup) {
   };
 
   const failed = Object.values(results).filter((r) => r.status === "error");
-  const queried = ACTIVE_SOURCES.filter((s) => results[s.id]);
+  const queried = IP_SOURCES.filter((s) => results[s.id]);
   const allPrivate = queried.length > 0 && failed.length === queried.length && failed.every((f) => f.code === 422);
 
   return {

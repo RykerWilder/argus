@@ -4,6 +4,7 @@ import { Braces, ChevronDown, Copy, ExternalLink, FileText, Paperclip, Search, U
 import Header, { Bracket, Footer } from "../components/Header";
 import IconButton from "../components/IconButton";
 import WorldMap from "../components/WorldMap";
+import { postJson } from "../lib/api";
 import { copyText } from "../lib/clipboard";
 import { download } from "../lib/exporters";
 import { classify, resultPath } from "../lib/target";
@@ -19,6 +20,8 @@ import { isServiceEnabled } from "../lib/settings";
 // scheda è aperta, così tornando indietro da un report IP lo si ritrova.
 
 const MAX_FILE = 25 * 1024 * 1024;
+// nginx aspetta il backend fino a 60 secondi
+const ANALYZE_TIMEOUT = 65_000;
 let lastReport = null;
 
 const TIME_FMT = new Intl.DateTimeFormat("en-GB", {
@@ -84,23 +87,14 @@ export default function EmailAnalyzer() {
       const input = file ? { filename: file.name, content: await readAsBase64(file) } : { text };
       // le posizioni dei server vengono da ip-api.com: se è disattivato non si interroga
       const body = { ...input, geolocate: isServiceEnabled("iptracker") };
-      const res = await fetch("/api/email/analyze", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        const d = data.detail;
-        throw new Error(typeof d === "string" ? d : res.status === 413 ? "The file is too large." : `The analysis failed (HTTP ${res.status}).`);
-      }
+      const data = await postJson("/api/email/analyze", body, { timeout: ANALYZE_TIMEOUT });
       lastReport = data;
       setReport(data);
       setText("");
       setFile(null);
       window.scrollTo({ top: 0 });
     } catch (err) {
-      setError(err.message === "Failed to fetch" ? "The backend could not be reached." : err.message);
+      setError(err.message);
     } finally {
       setBusy(false);
     }

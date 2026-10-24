@@ -1,20 +1,15 @@
 // Interroga in parallelo le sorgenti adatte al tipo di ricerca (IP, dominio o
 // URL) e notifica l'avanzamento.
-//
-// `enabled: false` esclude una sorgente senza toccarne la logica: l'endpoint
-// /api/whois (RDAP per gli IP) resta nel backend e il codice del suo riquadro
-// resta in report.js. Per riattivarla basta rimettere `true`.
 
-import { getApiKey, isServiceEnabled } from "./settings";
+import { ApiError, postJson } from "./api";
+import { API_KEY_HEADER, getApiKey, isServiceEnabled } from "./settings";
 
-export const SOURCES = [
-  { id: "iptracker", name: "ip-api.com", covers: "Location and connection", enabled: true },
-  { id: "proxycheck", name: "ProxyCheck.io", covers: "VPN, proxy and Tor detection", enabled: true },
-  { id: "abuseipdb", name: "AbuseIPDB", covers: "Abuse reports and connection type", enabled: true },
-  { id: "whois", name: "RDAP WHOIS", covers: "Who owns the address block", enabled: false },
+// Indirizzi IP
+export const IP_SOURCES = [
+  { id: "iptracker", name: "ip-api.com", covers: "Location and connection" },
+  { id: "proxycheck", name: "ProxyCheck.io", covers: "VPN, proxy and Tor detection" },
+  { id: "abuseipdb", name: "AbuseIPDB", covers: "Abuse reports and connection type" },
 ];
-
-export const ACTIVE_SOURCES = SOURCES.filter((s) => s.enabled);
 
 // Domini e URL
 export const DOMAIN_SOURCES = [
@@ -23,14 +18,14 @@ export const DOMAIN_SOURCES = [
 ];
 
 export const SOURCE_NAMES = Object.fromEntries(
-  [...SOURCES, ...DOMAIN_SOURCES].map((s) => [s.id, s.name]),
+  [...IP_SOURCES, ...DOMAIN_SOURCES].map((s) => [s.id, s.name]),
 );
 
 // Le fonti da interrogare per `target`: quelle adatte al tipo di ricerca che
 // l'utente non ha disattivato nelle impostazioni (Settings > Preferences).
 export function sourcesFor(target) {
   let sources = DOMAIN_SOURCES;
-  if (target.kind === "ip") sources = ACTIVE_SOURCES;
+  if (target.kind === "ip") sources = IP_SOURCES;
   // il WHOIS di dominio non ha senso se l'URL punta a un indirizzo IP
   else if (target.kind === "url" && target.hostIsIp) sources = DOMAIN_SOURCES.filter((s) => s.id !== "domainwhois");
   return sources.filter((s) => isServiceEnabled(s.id));
@@ -96,35 +91,27 @@ function setCached(target, lookup) {
   }
 }
 
+// Le fonti si interrogano al massimo per questo tempo: VirusTotal può fare più
+// richieste di fila e nginx aspetta il backend fino a 60 secondi.
+const SOURCE_TIMEOUT = 65_000;
+
 async function querySource(source, target, signal) {
   const started = performance.now();
+  const elapsed = () => Math.round(performance.now() - started);
+  // Se l'utente ha salvato una chiave API per questa fonte, il backend usa
+  // quella al posto della chiave di .env.
+  const apiKey = getApiKey(source.id);
+  const headers = apiKey ? { [API_KEY_HEADER]: apiKey } : undefined;
   try {
-    // Se l'utente ha salvato una chiave API per questa fonte, il backend usa
-    // quella al posto della chiave di .env.
-    const headers = { "Content-Type": "application/json" };
-    const apiKey = getApiKey(source.id);
-    if (apiKey) headers["X-Argus-Api-Key"] = apiKey;
-
-    const res = await fetch(`/api/${source.endpoint || source.id}`, {
-      method: "POST",
+    const data = await postJson(`/api/${source.endpoint || source.id}`, bodyFor(source.id, target), {
       headers,
-      body: JSON.stringify(bodyFor(source.id, target)),
       signal,
+      timeout: SOURCE_TIMEOUT,
     });
-    const body = await res.json().catch(() => ({}));
-    const ms = Math.round(performance.now() - started);
-    if (!res.ok) {
-      const detail = typeof body.detail === "string" ? body.detail : `HTTP ${res.status}`;
-      return { status: "error", error: detail, code: res.status, ms };
-    }
-    return { status: "ok", data: body, ms };
+    return { status: "ok", data, ms: elapsed() };
   } catch (err) {
-    if (err.name === "AbortError") throw err;
-    return {
-      status: "error",
-      error: "The backend could not be reached.",
-      ms: Math.round(performance.now() - started),
-    };
+    if (!(err instanceof ApiError)) throw err; // AbortError: la ricerca è stata annullata
+    return { status: "error", error: err.message, code: err.status, ms: elapsed() };
   }
 }
 

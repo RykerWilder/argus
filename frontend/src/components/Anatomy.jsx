@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { request } from "../lib/api";
 import { buildAnatomy, guessParts } from "../lib/anatomy";
 
 // Il dominio o l'URL intero, diviso nelle sue parti. Passando il mouse (o con
@@ -21,17 +22,15 @@ export default function Anatomy({ target }) {
 
   useEffect(() => {
     if (target.hostIsIp) return;
-    let alive = true;
+    const controller = new AbortController();
     setParts(guessParts(host));
-    fetch(`/api/fqdn?host=${encodeURIComponent(host)}`)
-      .then((r) => (r.ok ? r.json() : null))
+    // se il backend non risponde resta la scomposizione ipotizzata dal browser
+    request(`/api/fqdn?host=${encodeURIComponent(host)}`, { signal: controller.signal, timeout: 8_000 })
       .then((data) => {
-        if (alive && data?.suffix) setParts({ ...data, guessed: false });
+        if (!controller.signal.aborted && data?.suffix) setParts({ ...data, guessed: false });
       })
       .catch(() => {});
-    return () => {
-      alive = false;
-    };
+    return () => controller.abort();
   }, [host, target.hostIsIp]);
 
   const segments = useMemo(() => buildAnatomy(target, parts || {}), [target, parts]);

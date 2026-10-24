@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from docs_theme import render_docs  # noqa: E402
-from routers import abuseipdb, domain_whois, email_analyzer, fqdn, iptracker, proxycheck, virustotal, whois  # noqa: E402
+from routers import abuseipdb, domain_whois, email_analyzer, fqdn, iptracker, proxycheck, virustotal  # noqa: E402
 
 # /docs è servito da docs_theme.py, con lo stesso stile del frontend.
 app = FastAPI(title="Argus API", version="2.1.0", docs_url=None)
@@ -30,7 +30,6 @@ def docs(request: Request) -> HTMLResponse:
 # e unisce i risultati eliminando i campi duplicati.
 app.include_router(iptracker.router, prefix="/api/iptracker", tags=["IP"])
 app.include_router(abuseipdb.router, prefix="/api/abuseipdb", tags=["IP"])
-app.include_router(whois.router, prefix="/api/whois", tags=["IP"])
 app.include_router(proxycheck.router, prefix="/api/proxycheck", tags=["IP"])
 
 # Domini e URL

@@ -1,10 +1,11 @@
 """Helper condivisi dai router per domini e URL."""
-import ipaddress
 import re
 from urllib.parse import urlsplit
 
 import tldextract
 from fastapi import HTTPException
+
+from .ip_utils import as_ip
 
 # Public Suffix List inclusa nel pacchetto: nessuna richiesta di rete, nessuna cache su disco.
 _extract = tldextract.TLDExtract(suffix_list_urls=(), cache_dir=None)
@@ -46,8 +47,6 @@ def normalize_url(raw: str) -> tuple[str, str]:
     if parts.scheme not in ("http", "https") or not parts.hostname:
         raise HTTPException(status_code=400, detail="Invalid URL: only http and https addresses are supported.")
     host = parts.hostname
-    try:
-        ipaddress.ip_address(host)
-    except ValueError:
+    if as_ip(host) is None:
         host = normalize_domain(host)
     return value, host

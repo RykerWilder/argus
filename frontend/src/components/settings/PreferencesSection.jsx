@@ -1,11 +1,11 @@
 import Toggle from "../Toggle";
-import { ACTIVE_SOURCES, DOMAIN_SOURCES } from "../../lib/lookup";
+import { DOMAIN_SOURCES, IP_SOURCES } from "../../lib/lookup";
 import { API_KEY_SERVICES, isServiceEnabled, setServiceEnabled } from "../../lib/settings";
 import { useSettingsVersion } from "../../lib/useSettings";
 
 // Quali servizi Argus può interrogare. Un servizio spento non viene chiamato.
 const GROUPS = [
-  { id: "ip", title: "IP addresses", used: "searches for IP addresses", sources: ACTIVE_SOURCES },
+  { id: "ip", title: "IP addresses", used: "searches for IP addresses", sources: IP_SOURCES },
   { id: "domain", title: "Domains and URLs", used: "searches for domains and URLs", sources: DOMAIN_SOURCES },
 ];
 

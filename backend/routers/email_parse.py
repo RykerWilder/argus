@@ -7,7 +7,6 @@ email_analyzer.py trasforma nel report.
 from __future__ import annotations
 
 import hashlib
-import ipaddress
 import re
 from dataclasses import dataclass, field
 from email import message_from_bytes, message_from_string
@@ -18,6 +17,8 @@ from email.utils import getaddresses, parseaddr, parsedate_to_datetime
 from typing import Optional
 
 import olefile
+
+from .ip_utils import IPAddress, as_ip, is_public_ip
 
 MAX_ATTACHMENTS = 50
 MAX_URLS = 200
@@ -280,7 +281,7 @@ IPV4 = r"(?:25[0-5]|2[0-4]\d|1?\d?\d)(?:\.(?:25[0-5]|2[0-4]\d|1?\d?\d)){3}"
 IP_CANDIDATES = re.compile(rf"\[(?:IPv6:)?([0-9A-Fa-f:.]+)\]|\(([0-9A-Fa-f:.]{{3,}})\)|\b({IPV4})\b|((?:[0-9a-fA-F]{{1,4}}:){{2,7}}[0-9a-fA-F]{{0,4}})")
 
 
-def find_ip(text: str, prefer_parentheses: bool = False) -> Optional[ipaddress.IPv4Address | ipaddress.IPv6Address]:
+def find_ip(text: str, prefer_parentheses: bool = False) -> Optional[IPAddress]:
     text = text or ""
     if prefer_parentheses:
         # "from HELO (rdns [IP])": il nome dopo "from" è quello dichiarato dal client
@@ -290,16 +291,10 @@ def find_ip(text: str, prefer_parentheses: bool = False) -> Optional[ipaddress.I
             if ip:
                 return ip
     for m in IP_CANDIDATES.finditer(text):
-        raw = next(g for g in m.groups() if g)
-        try:
-            return ipaddress.ip_address(raw.strip("[]"))
-        except ValueError:
-            continue
+        ip = as_ip(next(g for g in m.groups() if g))
+        if ip is not None:
+            return ip
     return None
-
-
-def is_public(ip) -> bool:
-    return bool(ip) and ip.is_global
 
 
 # ── Received ───────────────────────────────────────────────
@@ -350,7 +345,7 @@ def parse_received(value: str) -> dict:
             "host": host_of(from_raw),
             "rdns": rdns_of(from_raw),
             "ip": str(from_ip) if from_ip else None,
-            "public": is_public(from_ip),
+            "public": is_public_ip(from_ip),
         } if from_raw else None,
         "by": {"host": host_of(by_raw), "ip": str(by_ip) if by_ip else None} if by_raw else None,
         "protocol": protocol,

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Header, { Bracket, Footer } from "../components/Header";
 import LookupProgress from "../components/LookupProgress";
 import NetworkBackground from "../components/NetworkBackground";
+import { request } from "../lib/api";
 import { getCached, runLookup, sourcesFor } from "../lib/lookup";
 import { classify, resultPath } from "../lib/target";
 
@@ -61,8 +62,7 @@ export default function Home() {
     setFindingMine(true);
     setError(null);
     try {
-      const res = await fetch("https://api.ipify.org?format=json");
-      const { ip } = await res.json();
+      const { ip } = await request("https://api.ipify.org?format=json", { timeout: 8_000 });
       setValue(ip);
       analyze(ip);
     } catch {

@@ -1,4 +1,4 @@
-import { ACTIVE_SOURCES } from "../lib/lookup";
+import { IP_SOURCES } from "../lib/lookup";
 
 const STATUS_TEXT = {
   pending: "Querying",
@@ -6,7 +6,7 @@ const STATUS_TEXT = {
   error: "Unavailable",
 };
 
-export default function LookupProgress({ label, ip, progress, sources = ACTIVE_SOURCES }) {
+export default function LookupProgress({ label, ip, progress, sources = IP_SOURCES }) {
   const SOURCES = sources;
   const done = SOURCES.filter((s) => progress?.[s.id]?.status && progress[s.id].status !== "pending").length;
 

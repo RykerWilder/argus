@@ -363,6 +363,8 @@ export default function WorldMap({ countryCode, lat, lon, className = "", label,
         role="img"
         aria-label={label || "World map"}
         preserveAspectRatio="xMidYMid meet"
+        // fattore di zoom: il CSS ne ricava le dimensioni dei testi (font-size: calc(11px / var(--k)))
+        style={{ "--k": k }}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
@@ -432,7 +434,7 @@ export default function WorldMap({ countryCode, lat, lon, className = "", label,
               <g key={i} className={`worldmap__stop ${i === 0 ? "is-origin" : ""} ${i === stops.length - 1 ? "is-last" : ""}`}>
                 {i === 0 && <circle className="worldmap__pulse" cx={s.xy[0]} cy={s.xy[1]} r={13 / k} vectorEffect="non-scaling-stroke" />}
                 <circle className="worldmap__stop-dot" cx={s.xy[0]} cy={s.xy[1]} r={(s.label.length > 2 ? 13 : 10) / k} />
-                <text x={s.xy[0]} y={s.xy[1]} dy={4 / k} textAnchor="middle" style={{ fontSize: 11 / k }}>
+                <text x={s.xy[0]} y={s.xy[1]} dy={4 / k} textAnchor="middle">
                   {s.label}
                 </text>
                 <title>{s.title || s.label}</title>
@@ -451,12 +453,11 @@ export default function WorldMap({ countryCode, lat, lon, className = "", label,
             <text
               x={Math.min(point[0] + 8 / k, view.x + view.w - 4 / k)}
               y={view.y + 14 / k}
-              style={{ fontSize: 10 / k }}
               textAnchor={point[0] > view.x + view.w - 90 / k ? "end" : "start"}
             >
               {lon.toFixed(2)}°
             </text>
-            <text x={view.x + 6 / k} y={point[1] - 7 / k} style={{ fontSize: 10 / k }}>
+            <text x={view.x + 6 / k} y={point[1] - 7 / k}>
               {lat.toFixed(2)}°
             </text>
           </g>

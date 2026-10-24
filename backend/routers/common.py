@@ -1,10 +1,11 @@
 """Helper condivisi dai router IP."""
-import ipaddress
 import os
 import re
 
 from fastapi import HTTPException, Request
 from pydantic import BaseModel, Field
+
+from .ip_utils import IPAddress, as_ip
 
 # Intestazione con cui il frontend invia la chiave salvata nelle impostazioni.
 API_KEY_HEADER = "X-Argus-Api-Key"
@@ -26,15 +27,15 @@ class IPRequest(BaseModel):
     ip: str = Field(..., description="Indirizzo IPv4/IPv6 da analizzare, es. 8.8.8.8")
 
 
-def parse_ip(raw: str) -> ipaddress.IPv4Address | ipaddress.IPv6Address:
+def parse_ip(raw: str) -> IPAddress:
     """Valida l'IP e restituisce l'oggetto ipaddress, oppure 400."""
-    try:
-        return ipaddress.ip_address((raw or "").strip())
-    except ValueError:
+    addr = as_ip(raw)
+    if addr is None:
         raise HTTPException(status_code=400, detail="Invalid IP address.")
+    return addr
 
 
-def require_public(addr) -> str:
+def require_public(addr: IPAddress) -> str:
     """Le sorgenti esterne lavorano solo su IP pubblici: 422 negli altri casi."""
     if not addr.is_global:
         raise HTTPException(

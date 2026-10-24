@@ -14,8 +14,8 @@
   --warn: #f6b54b;
   --danger: #ff6b4f;
 
-  --sans: "Geist", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  --mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --sans: "Geist Variable", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --mono: "Geist Mono Variable", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
   --gutter: clamp(16px, 2.6vw, 40px);
   --grid: 72px;
@@ -472,7 +472,7 @@ input {
 .worldmap__marker text {
   fill: var(--muted);
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: calc(10px / var(--k, 1));
 }
 
 .worldmap__ring {
@@ -2435,6 +2435,7 @@ a.icon-btn {
 .worldmap__stop text {
   fill: var(--accent);
   font-family: var(--mono);
+  font-size: calc(11px / var(--k, 1));
   font-weight: 500;
   pointer-events: none;
 }
