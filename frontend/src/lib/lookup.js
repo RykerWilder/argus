@@ -5,6 +5,8 @@
 // /api/whois (RDAP per gli IP) resta nel backend e il codice del suo riquadro
 // resta in report.js. Per riattivarla basta rimettere `true`.
 
+import { getApiKey, isServiceEnabled } from "./settings";
+
 export const SOURCES = [
   { id: "iptracker", name: "ip-api.com", covers: "Location and connection", enabled: true },
   { id: "proxycheck", name: "ProxyCheck.io", covers: "VPN, proxy and Tor detection", enabled: true },
@@ -24,11 +26,14 @@ export const SOURCE_NAMES = Object.fromEntries(
   [...SOURCES, ...DOMAIN_SOURCES].map((s) => [s.id, s.name]),
 );
 
+// Le fonti da interrogare per `target`: quelle adatte al tipo di ricerca che
+// l'utente non ha disattivato nelle impostazioni (Settings > Preferences).
 export function sourcesFor(target) {
-  if (target.kind === "ip") return ACTIVE_SOURCES;
+  let sources = DOMAIN_SOURCES;
+  if (target.kind === "ip") sources = ACTIVE_SOURCES;
   // il WHOIS di dominio non ha senso se l'URL punta a un indirizzo IP
-  if (target.kind === "url" && target.hostIsIp) return DOMAIN_SOURCES.filter((s) => s.id !== "domainwhois");
-  return DOMAIN_SOURCES;
+  else if (target.kind === "url" && target.hostIsIp) sources = DOMAIN_SOURCES.filter((s) => s.id !== "domainwhois");
+  return sources.filter((s) => isServiceEnabled(s.id));
 }
 
 function bodyFor(sourceId, target) {
@@ -45,7 +50,9 @@ const CACHE_TTL = 10 * 60 * 1000;
 const ERROR_TTL = 15 * 1000;
 const memory = new Map();
 
-const keyOf = (target) => `${target.kind}:${target.value}`;
+// La chiave include le fonti attive: se l'utente cambia le preferenze, un
+// risultato salvato con altre fonti non viene riusato.
+const keyOf = (target) => `${target.kind}:${target.value}:${sourcesFor(target).map((s) => s.id).join("+")}`;
 // errori, oppure un'analisi VirusTotal ancora in coda: in entrambi i casi la
 // ricerca successiva deve interrogare di nuovo le fonti
 const hasErrors = (lookup) =>
@@ -92,9 +99,15 @@ function setCached(target, lookup) {
 async function querySource(source, target, signal) {
   const started = performance.now();
   try {
+    // Se l'utente ha salvato una chiave API per questa fonte, il backend usa
+    // quella al posto della chiave di .env.
+    const headers = { "Content-Type": "application/json" };
+    const apiKey = getApiKey(source.id);
+    if (apiKey) headers["X-Argus-Api-Key"] = apiKey;
+
     const res = await fetch(`/api/${source.endpoint || source.id}`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers,
       body: JSON.stringify(bodyFor(source.id, target)),
       signal,
     });

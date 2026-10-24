@@ -11,6 +11,7 @@ import { classify, resultPath } from "../lib/target";
 import { countryName } from "../lib/countries";
 import { AUTH_EXPLAIN, explainHeader } from "../lib/emailHeaders";
 import { duration, emailFileName, emailSummaryText, emailToJSON, emailToMarkdown } from "../lib/emailExport";
+import { isServiceEnabled } from "../lib/settings";
 
 // Email header analyzer (/tools/email-headers).
 // L'email (header incollati, .eml o .msg) va al backend solo per l'analisi e
@@ -81,7 +82,9 @@ export default function EmailAnalyzer() {
     setBusy(true);
     setError(null);
     try {
-      const body = file ? { filename: file.name, content: await readAsBase64(file) } : { text };
+      const input = file ? { filename: file.name, content: await readAsBase64(file) } : { text };
+      // le posizioni dei server vengono da ip-api.com: se è disattivato non si interroga
+      const body = { ...input, geolocate: isServiceEnabled("iptracker") };
       const res = await fetch("/api/email/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -140,6 +143,7 @@ export default function EmailAnalyzer() {
         <ToolsMenu />
         <Link to="/history" className="nav-link nav-link--hide-sm">History</Link>
         <Link to="/sources" className="nav-link nav-link--hide-sm">Sources</Link>
+        <Link to="/settings" className="nav-link nav-link--hide-sm">Settings</Link>
         {report ? (
           <Bracket type="button" onClick={reset}>New analysis</Bracket>
         ) : (

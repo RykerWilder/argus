@@ -1,13 +1,12 @@
 """ProxyCheck.io (API v3): rilevamento VPN, proxy, Tor, hosting e rischio."""
-import os
 import time
 from typing import Any, Optional
 
 import httpx
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from pydantic import Field
 
-from .common import IPRequest, parse_ip, require_public
+from .common import IPRequest, parse_ip, request_api_key, require_public
 
 router = APIRouter()
 
@@ -23,9 +22,9 @@ class ProxyRequest(IPRequest):
     days: Optional[float] = Field(default=None, ge=0.01, le=60)
 
 
-def _api_key() -> Optional[str]:
+def _api_key(http_request: Request) -> Optional[str]:
     # La key è facoltativa: senza key ProxyCheck applica un limite giornaliero ridotto.
-    return os.getenv("PROXYCHECK_API_KEY", "").strip() or None
+    return request_api_key(http_request, "PROXYCHECK_API_KEY") or None
 
 
 def _cache_get(key: tuple) -> Optional[dict]:
@@ -158,11 +157,11 @@ def _normalize(ip: str, body: dict) -> dict:
 
 
 @router.post("")
-async def check_ip(request: ProxyRequest):
+async def check_ip(request: ProxyRequest, http_request: Request):
     ip = require_public(parse_ip(request.ip))
 
     params: dict = {}
-    if key := _api_key():
+    if key := _api_key(http_request):
         params["key"] = key
     if request.days is not None:
         params["days"] = request.days

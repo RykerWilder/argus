@@ -1,6 +1,6 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import "./styles.css";
 
 import Home from "./pages/Home";
@@ -9,6 +9,7 @@ import Sources from "./pages/Sources";
 import History from "./pages/History";
 import DomainResult from "./pages/DomainResult";
 import EmailAnalyzer from "./pages/EmailAnalyzer";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 createRoot(document.getElementById("root")).render(
@@ -22,6 +23,10 @@ createRoot(document.getElementById("root")).render(
         <Route path="/sources" element={<Sources />} />
         <Route path="/history" element={<History />} />
         <Route path="/tools/email-headers" element={<EmailAnalyzer />} />
+        <Route path="/settings" element={<Navigate to="/settings/preferences" replace />} />
+        <Route path="/settings/security" element={<Settings section="security" />} />
+        <Route path="/settings/preferences" element={<Settings section="preferences" />} />
+        <Route path="/settings/api-keys" element={<Settings section="api-keys" />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>

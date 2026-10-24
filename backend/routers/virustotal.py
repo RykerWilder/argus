@@ -6,14 +6,14 @@ ricerca non supera mai 4 richieste.
 """
 import asyncio
 import base64
-import os
 from datetime import datetime, timezone
 from typing import Any, Literal, Optional
 
 import httpx
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, Field
 
+from .common import request_api_key
 from .domain_common import normalize_domain, normalize_url
 
 router = APIRouter()
@@ -28,10 +28,13 @@ class VTRequest(BaseModel):
     type: Literal["domain", "url"] = "domain"
 
 
-def _api_key() -> str:
-    key = os.getenv("VIRUSTOTAL_API_KEY", "").strip()
+def _api_key(http_request: Request) -> str:
+    key = request_api_key(http_request, "VIRUSTOTAL_API_KEY")
     if not key:
-        raise HTTPException(status_code=503, detail="VIRUSTOTAL_API_KEY is not set in .env.")
+        raise HTTPException(
+            status_code=503,
+            detail="No VirusTotal API key: add one in Settings or set VIRUSTOTAL_API_KEY in .env.",
+        )
     return key
 
 
@@ -181,8 +184,8 @@ async def _url(client: httpx.AsyncClient, url: str) -> dict:
 
 
 @router.post("")
-async def virustotal(request: VTRequest):
-    headers = {"x-apikey": _api_key(), "Accept": "application/json"}
+async def virustotal(request: VTRequest, http_request: Request):
+    headers = {"x-apikey": _api_key(http_request), "Accept": "application/json"}
     try:
         async with httpx.AsyncClient(headers=headers, timeout=20.0) as client:
             if request.type == "domain":

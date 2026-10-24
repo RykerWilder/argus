@@ -76,11 +76,12 @@ export function QuickSearch({ current }) {
   );
 }
 
-export function Empty({ title, body }) {
+export function Empty({ title, body, children }) {
   return (
     <section className="empty">
       <h1>{title}</h1>
       <p>{body}</p>
+      {children}
       <Bracket as={Link} to="/">Search another address</Bracket>
     </section>
   );

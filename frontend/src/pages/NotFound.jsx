@@ -100,6 +100,7 @@ export default function NotFound() {
         <ToolsMenu />
         <Link to="/history" className="nav-link nav-link--hide-sm">History</Link>
         <Link to="/sources" className="nav-link nav-link--hide-sm">Sources</Link>
+        <Link to="/settings" className="nav-link nav-link--hide-sm">Settings</Link>
         <Bracket as={Link} to="/">New search</Bracket>
       </Header>
 

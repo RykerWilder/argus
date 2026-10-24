@@ -1,8 +1,25 @@
 """Helper condivisi dai router IP."""
 import ipaddress
+import os
+import re
 
-from fastapi import HTTPException
+from fastapi import HTTPException, Request
 from pydantic import BaseModel, Field
+
+# Intestazione con cui il frontend invia la chiave salvata nelle impostazioni.
+API_KEY_HEADER = "X-Argus-Api-Key"
+_KEY_FORMAT = re.compile(r"[A-Za-z0-9._~+/=-]{8,256}")
+
+
+def request_api_key(http_request: Request, env_name: str) -> str:
+    """Chiave API per la richiesta: quella impostata nel browser (Settings) se
+    c'è, altrimenti quella di .env. Stringa vuota se non ce n'è nessuna."""
+    sent = (http_request.headers.get(API_KEY_HEADER) or "").strip()
+    if sent:
+        if not _KEY_FORMAT.fullmatch(sent):
+            raise HTTPException(status_code=400, detail="The API key saved in Settings has an invalid format.")
+        return sent
+    return os.getenv(env_name, "").strip()
 
 
 class IPRequest(BaseModel):

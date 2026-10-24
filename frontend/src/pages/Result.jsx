@@ -23,13 +23,17 @@ import {
   usePageTitle,
 } from "../components/ResultParts";
 import { buildReport } from "../lib/report";
+import { sourcesFor } from "../lib/lookup";
 
 export default function Result() {
   const { ip: rawIp } = useParams();
   const ip = normalizeIp(decodeURIComponent(rawIp || ""));
   const valid = isValidIp(ip);
   const target = useMemo(() => (valid ? { kind: "ip", value: ip } : null), [ip, valid]);
-  const { lookup, progress } = useLookup(target);
+  // se l'utente ha disattivato tutte le fonti per gli IP non c'è nulla da cercare
+  const sources = target ? sourcesFor(target) : [];
+  const noSources = !!target && sources.length === 0;
+  const { lookup, progress } = useLookup(noSources ? null : target);
   usePageTitle(ip);
 
   const report = useMemo(() => (lookup ? buildReport(lookup) : null), [lookup]);
@@ -45,15 +49,23 @@ export default function Result() {
         <ToolsMenu className="nav-link--hide-sm" />
         <Link to="/history" className="nav-link nav-link--hide-sm">History</Link>
         <Link to="/sources" className="nav-link nav-link--hide-sm">Sources</Link>
+        <Link to="/settings" className="nav-link nav-link--hide-sm">Settings</Link>
         <Bracket as={Link} to="/">New search</Bracket>
       </Header>
 
       <main>
         {!valid ? (
           <Empty title="That isn’t an IP address" body={`“${ip}” is not a valid IPv4 or IPv6 address.`} />
+        ) : noSources ? (
+          <Empty
+            title="All sources are turned off"
+            body="Every source used for IP addresses is turned off, so there is nothing to look up."
+          >
+            <Bracket as={Link} to="/settings/preferences">Open preferences</Bracket>
+          </Empty>
         ) : !report ? (
           <div className="result-loading">
-            <LookupProgress ip={ip} progress={progress} />
+            <LookupProgress ip={ip} progress={progress} sources={sources} />
           </div>
         ) : report.allPrivate ? (
           <Empty
@@ -97,8 +109,8 @@ function Report({ report }) {
             {verdict.title}
           </p>
           <div className="verdict__scores">
-            <Score label="AbuseIPDB confidence" value={report.abuseScore} suffix="%" />
-            <Score label="ProxyCheck.io risk" value={report.risk} suffix="/100" />
+            {report.sources.abuseipdb && <Score label="AbuseIPDB confidence" value={report.abuseScore} suffix="%" />}
+            {report.sources.proxycheck && <Score label="ProxyCheck.io risk" value={report.risk} suffix="/100" />}
           </div>
           {verdict.reasons.length > 0 && <p className="verdict__reasons">{verdict.reasons.join(", ")}</p>}
         </div>

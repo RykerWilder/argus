@@ -334,7 +334,8 @@ export function buildReport(lookup) {
   };
 
   const failed = Object.values(results).filter((r) => r.status === "error");
-  const allPrivate = failed.length === ACTIVE_SOURCES.length && failed.every((f) => f.code === 422);
+  const queried = ACTIVE_SOURCES.filter((s) => results[s.id]);
+  const allPrivate = queried.length > 0 && failed.length === queried.length && failed.every((f) => f.code === 422);
 
   return {
     ip,
@@ -345,7 +346,7 @@ export function buildReport(lookup) {
     verdict,
     abuseScore,
     risk,
-    panels: ACTIVE_SOURCES.map((s) => ({
+    panels: queried.map((s) => ({
       ...s,
       status: results[s.id]?.status,
       error: results[s.id]?.error,

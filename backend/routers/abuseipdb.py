@@ -1,13 +1,12 @@
 """AbuseIPDB: reputazione e segnalazioni di abuso per un IP."""
-import os
 from collections import Counter
 from datetime import datetime, timedelta, timezone
 
 import httpx
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from pydantic import Field
 
-from .common import IPRequest, parse_ip, require_public
+from .common import IPRequest, parse_ip, request_api_key, require_public
 
 router = APIRouter()
 
@@ -32,21 +31,21 @@ class AbuseRequest(IPRequest):
     maxAgeInDays: int = Field(default=90, ge=1, le=365)
 
 
-def _api_key() -> str:
-    key = os.getenv("ABUSEIPDB_API_KEY", "").strip()
+def _api_key(http_request: Request) -> str:
+    key = request_api_key(http_request, "ABUSEIPDB_API_KEY")
     if not key:
         raise HTTPException(
             status_code=503,
-            detail="ABUSEIPDB_API_KEY is not set in .env.",
+            detail="No AbuseIPDB API key: add one in Settings or set ABUSEIPDB_API_KEY in .env.",
         )
     return key
 
 
 @router.post("")
-async def check_ip(request: AbuseRequest):
+async def check_ip(request: AbuseRequest, http_request: Request):
     ip = require_public(parse_ip(request.ip))
     params = {"ipAddress": ip, "maxAgeInDays": request.maxAgeInDays, "verbose": ""}
-    headers = {"Key": _api_key(), "Accept": "application/json"}
+    headers = {"Key": _api_key(http_request), "Accept": "application/json"}
 
     try:
         async with httpx.AsyncClient() as client:

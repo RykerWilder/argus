@@ -37,6 +37,7 @@ class EmailRequest(BaseModel):
     text: Optional[str] = Field(default=None, max_length=MAX_TEXT_CHARS, description="Header (o messaggio intero) incollati")
     filename: Optional[str] = Field(default=None, max_length=255)
     content: Optional[str] = Field(default=None, description="File .eml o .msg in base64")
+    geolocate: bool = Field(default=True, description="Se falso non si interroga ip-api.com per la mappa del percorso")
 
 
 def registrable(domain: Optional[str]) -> Optional[str]:
@@ -438,7 +439,10 @@ async def analyze(request: EmailRequest):
                 hop_ips.append(ip)
     if report["origin"] and report["origin"]["ip"] not in hop_ips:
         hop_ips.insert(0, report["origin"]["ip"])
-    geo, geo_error = await geolocate(hop_ips)
+    if request.geolocate:
+        geo, geo_error = await geolocate(hop_ips)
+    else:
+        geo, geo_error = {}, "Server locations are turned off: ip-api.com is disabled in Settings."
     report["geo"] = geo
     if geo_error:
         report["notes"].append(geo_error)

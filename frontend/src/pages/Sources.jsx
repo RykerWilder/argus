@@ -88,6 +88,7 @@ export default function Sources() {
       <Header>
         <ToolsMenu />
         <Link to="/history" className="nav-link">History</Link>
+        <Link to="/settings" className="nav-link">Settings</Link>
         <Bracket as={Link} to="/">New search</Bracket>
       </Header>
 

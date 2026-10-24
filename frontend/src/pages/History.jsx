@@ -102,6 +102,7 @@ export default function History() {
       <Header>
         <ToolsMenu />
         <Link to="/sources" className="nav-link">Sources</Link>
+        <Link to="/settings" className="nav-link">Settings</Link>
         <Bracket as={Link} to="/">New search</Bracket>
       </Header>
 

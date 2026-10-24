@@ -34,7 +34,9 @@ export default function DomainResult({ kind }) {
     const t = classify(raw);
     return t.kind === kind ? t : null;
   }, [raw, kind]);
-  const { lookup, progress } = useLookup(target);
+  const sources = target ? sourcesFor(target) : [];
+  const noSources = !!target && sources.length === 0;
+  const { lookup, progress } = useLookup(noSources ? null : target);
   usePageTitle(target ? (target.kind === "url" ? target.host : target.value) : raw);
 
   const report = useMemo(() => (lookup?.target ? buildDomainReport(lookup) : null), [lookup]);
@@ -51,6 +53,7 @@ export default function DomainResult({ kind }) {
         <ToolsMenu className="nav-link--hide-sm" />
         <Link to="/history" className="nav-link nav-link--hide-sm">History</Link>
         <Link to="/sources" className="nav-link nav-link--hide-sm">Sources</Link>
+        <Link to="/settings" className="nav-link nav-link--hide-sm">Settings</Link>
         <Bracket as={Link} to="/">New search</Bracket>
       </Header>
 
@@ -60,9 +63,16 @@ export default function DomainResult({ kind }) {
             title={kind === "domain" ? "That isn’t a domain" : "That isn’t a valid URL"}
             body={`“${raw}” could not be read as a ${kind === "domain" ? "domain name" : "http or https URL"}.`}
           />
+        ) : noSources ? (
+          <Empty
+            title="All sources are turned off"
+            body={`Every source used for ${kind === "domain" ? "domains" : "URLs"} is turned off, so there is nothing to look up.`}
+          >
+            <Bracket as={Link} to="/settings/preferences">Open preferences</Bracket>
+          </Empty>
         ) : !report ? (
           <div className="result-loading">
-            <LookupProgress label={target.value} progress={progress} sources={sourcesFor(target)} />
+            <LookupProgress label={target.value} progress={progress} sources={sources} />
           </div>
         ) : (
           <Report report={report} target={target} />

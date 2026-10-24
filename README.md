@@ -72,6 +72,16 @@ Set these variables in `.env`:
 
 A missing key disables only the source that needs it. Never commit `.env`: it is already listed in `.gitignore`.
 
+### Settings page
+
+The **Settings** entry in the header opens a page with three sections:
+
+- **Security**: reserved for future options.
+- **Preferences**: a toggle for each service. A service that is turned off is not queried and its panel is left out of the report. For example, turn AbuseIPDB off to search IP addresses without it.
+- **API keys**: your own keys for AbuseIPDB, ProxyCheck.io and VirusTotal. A key saved here is used instead of the one in `.env`; without one, Argus falls back to the server key.
+
+For now these settings are stored in the browser's local storage, in plain text, so they are per browser and are not shared between users. Keys saved there are sent to the Argus backend with each request, only to call the matching service.
+
 ## API
 
 Each source is a separate endpoint. IP endpoints accept `{"ip": "8.8.8.8"}`.

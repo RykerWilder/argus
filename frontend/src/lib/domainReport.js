@@ -2,7 +2,7 @@
 // un dato già mostrato (registrar, data di creazione, name server) non viene
 // ripetuto nel riquadro successivo; i dati chiave sono riassunti in cima.
 
-import { DOMAIN_SOURCES, sourcesFor } from "./lookup";
+import { DOMAIN_SOURCES } from "./lookup";
 import { countryName } from "./countries";
 import { formatDate, formatDateTime } from "./report";
 
@@ -175,7 +175,8 @@ export function buildDomainReport(lookup) {
     },
   ];
 
-  const sources = sourcesFor(target);
+  // solo le fonti interrogate in questa ricerca (alcune possono essere disattivate)
+  const sources = DOMAIN_SOURCES.filter((s) => results[s.id]);
   const failed = Object.values(results).filter((r) => r.status === "error");
 
   return {
@@ -187,7 +188,7 @@ export function buildDomainReport(lookup) {
     detectionScore: stats?.total ? { value: stats.malicious, suffix: `/${stats.total}`, percent: (stats.malicious / stats.total) * 100 } : null,
     reputation: vt?.found && typeof vt.reputation === "number" ? vt.reputation : null,
     highlights,
-    panels: DOMAIN_SOURCES.filter((s) => sources.includes(s)).map((s) => ({
+    panels: sources.map((s) => ({
       ...s,
       status: results[s.id]?.status,
       error: results[s.id]?.error,
@@ -202,7 +203,7 @@ export function buildDomainReport(lookup) {
     redirects,
     vtNotFound: vt && !vt.found,
     vtQueued: vt?.status === "queued",
-    allFailed: failed.length === sources.length,
+    allFailed: sources.length > 0 && failed.length === sources.length,
     sources: results,
   };
 }

@@ -27,6 +27,11 @@ export default function Home() {
       setError(target.error);
       return;
     }
+    if (sourcesFor(target).length === 0) {
+      const what = { ip: "IP addresses", domain: "domains", url: "URLs" }[target.kind];
+      setError(`Every source for ${what} is turned off. Turn one on in Settings, under Preferences.`);
+      return;
+    }
     setError(null);
 
     const path = resultPath(target);
@@ -81,6 +86,7 @@ export default function Home() {
         <ToolsMenu />
         <Link to="/history" className="nav-link">History</Link>
         <Link to="/sources" className="nav-link">Sources</Link>
+        <Link to="/settings" className="nav-link">Settings</Link>
         <Bracket type="button" onClick={useMyIp} disabled={findingMine || !!running}>
           {findingMine ? "Detecting…" : "Check my IP"}
         </Bracket>
