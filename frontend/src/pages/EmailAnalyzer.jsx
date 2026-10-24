@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { Braces, ChevronDown, Copy, ExternalLink, FileText, Paperclip, Search, Upload, X } from "lucide-react";
 import Header, { Bracket, Footer } from "../components/Header";
-import ToolsMenu from "../components/ToolsMenu";
 import IconButton from "../components/IconButton";
 import WorldMap from "../components/WorldMap";
 import { copyText } from "../lib/clipboard";
@@ -139,17 +138,9 @@ export default function EmailAnalyzer() {
 
   return (
     <div className="page page--tool">
-      <Header>
-        <ToolsMenu />
-        <Link to="/history" className="nav-link nav-link--hide-sm">History</Link>
-        <Link to="/sources" className="nav-link nav-link--hide-sm">Sources</Link>
-        <Link to="/settings" className="nav-link nav-link--hide-sm">Settings</Link>
-        {report ? (
-          <Bracket type="button" onClick={reset}>New analysis</Bracket>
-        ) : (
-          <Bracket as={Link} to="/">New search</Bracket>
-        )}
-      </Header>
+      <Header
+        actions={report && <Bracket type="button" onClick={reset}>New analysis</Bracket>}
+      />
 
       <main>
         {report ? (

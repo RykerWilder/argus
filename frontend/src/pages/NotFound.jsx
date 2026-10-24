@@ -1,7 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
-import Header, { Bracket, Footer } from "../components/Header";
-import ToolsMenu from "../components/ToolsMenu";
+import Header, { Footer } from "../components/Header";
 
 // Pagina 404. Lo zero di "404" è un occhio (Argo aveva cento occhi) la cui
 // iride segue il cursore; un clic sull'occhio lo fa ammiccare e cambia frase.
@@ -96,13 +94,7 @@ export default function NotFound() {
 
   return (
     <div className="page page--notfound">
-      <Header>
-        <ToolsMenu />
-        <Link to="/history" className="nav-link nav-link--hide-sm">History</Link>
-        <Link to="/sources" className="nav-link nav-link--hide-sm">Sources</Link>
-        <Link to="/settings" className="nav-link nav-link--hide-sm">Settings</Link>
-        <Bracket as={Link} to="/">New search</Bracket>
-      </Header>
+      <Header />
 
       <main className="notfound">
         <Eye404 onBlink={next} />

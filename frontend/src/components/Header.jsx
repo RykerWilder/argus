@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { FooterNav, MainNav } from "./MainNav";
 
 export function Logo() {
   return (
@@ -22,11 +23,18 @@ export function Logo() {
   );
 }
 
-export default function Header({ children }) {
+// children: elementi della pagina messi prima della navigazione (es. la ricerca
+// rapida). actions: elementi della pagina messi dopo (es. "New analysis").
+// Le voci di navigazione vere e proprie stanno tutte in MainNav.jsx.
+export default function Header({ children, actions }) {
   return (
     <header className="site-header">
       <Logo />
-      <nav className="site-header__nav">{children}</nav>
+      <nav className="site-header__nav" aria-label="Main">
+        {children}
+        <MainNav />
+        {actions}
+      </nav>
     </header>
   );
 }
@@ -41,17 +49,22 @@ export function Bracket({ as: As = "button", children, className = "", ...props 
   );
 }
 
-// Footer: sulla home solo il copyright, discreto; nelle altre pagine quello
-// completo con copyright, autore e motto.
+// Footer: sulla home solo copyright e link, discreti; nelle altre pagine quello
+// completo con copyright, autore e motto. I link sono in MainNav.jsx.
 export function Footer({ minimal = false }) {
   const year = new Date().getFullYear();
-  const copyright = <span className="site-footer__copy">© {year} RykerWilder</span>;
+  const start = (
+    <div className="site-footer__start">
+      <span className="site-footer__copy">© {year} RykerWilder</span>
+      <FooterNav />
+    </div>
+  );
   if (minimal) {
-    return <footer className="site-footer site-footer--minimal">{copyright}</footer>;
+    return <footer className="site-footer site-footer--minimal">{start}</footer>;
   }
   return (
     <footer className="site-footer">
-      {copyright}
+      {start}
       <span className="site-footer__credit">
         Developed by <strong>RykerWilder</strong>
       </span>

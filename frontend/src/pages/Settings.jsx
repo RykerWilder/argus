@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
-import Header, { Bracket, Footer } from "../components/Header";
-import ToolsMenu from "../components/ToolsMenu";
+import Header, { Footer } from "../components/Header";
 import SecuritySection from "../components/settings/SecuritySection";
 import PreferencesSection from "../components/settings/PreferencesSection";
 import ApiKeysSection from "../components/settings/ApiKeysSection";
@@ -27,13 +26,7 @@ export default function Settings({ section }) {
 
   return (
     <div className="page page--settings">
-      <Header>
-        <ToolsMenu />
-        <Link to="/history" className="nav-link nav-link--hide-sm">History</Link>
-        <Link to="/sources" className="nav-link nav-link--hide-sm">Sources</Link>
-        <Link to="/settings" className="nav-link is-current" aria-current="page">Settings</Link>
-        <Bracket as={Link} to="/">New search</Bracket>
-      </Header>
+      <Header />
 
       <main className="settings">
         <h1>Settings</h1>

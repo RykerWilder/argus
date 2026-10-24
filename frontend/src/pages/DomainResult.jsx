@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import Header, { Bracket, Footer } from "../components/Header";
-import ToolsMenu from "../components/ToolsMenu";
 import LookupProgress from "../components/LookupProgress";
 import ActionBar from "../components/ActionBar";
 import PanelTools from "../components/PanelTools";
@@ -50,11 +49,6 @@ export default function DomainResult({ kind }) {
     <div className="page page--result">
       <Header>
         <QuickSearch current={current} />
-        <ToolsMenu className="nav-link--hide-sm" />
-        <Link to="/history" className="nav-link nav-link--hide-sm">History</Link>
-        <Link to="/sources" className="nav-link nav-link--hide-sm">Sources</Link>
-        <Link to="/settings" className="nav-link nav-link--hide-sm">Settings</Link>
-        <Bracket as={Link} to="/">New search</Bracket>
       </Header>
 
       <main>

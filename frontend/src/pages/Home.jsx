@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Header, { Bracket, Footer } from "../components/Header";
-import ToolsMenu from "../components/ToolsMenu";
 import LookupProgress from "../components/LookupProgress";
 import NetworkBackground from "../components/NetworkBackground";
 import { getCached, runLookup, sourcesFor } from "../lib/lookup";
@@ -82,15 +81,7 @@ export default function Home() {
   return (
     <div className="page page--home">
       <NetworkBackground />
-      <Header>
-        <ToolsMenu />
-        <Link to="/history" className="nav-link">History</Link>
-        <Link to="/sources" className="nav-link">Sources</Link>
-        <Link to="/settings" className="nav-link">Settings</Link>
-        <Bracket type="button" onClick={useMyIp} disabled={findingMine || !!running}>
-          {findingMine ? "Detecting…" : "Check my IP"}
-        </Bracket>
-      </Header>
+      <Header />
 
       <main>
         <section className="search" aria-labelledby="search-title">
@@ -134,6 +125,14 @@ export default function Home() {
             <p id="ip-error" className="search__error" role="alert">
               {error}
             </p>
+          )}
+
+          {!running && (
+            <div className="search__aside">
+              <Bracket type="button" onClick={useMyIp} disabled={findingMine}>
+                {findingMine ? "Detecting…" : "Check my IP"}
+              </Bracket>
+            </div>
           )}
 
           {running && (

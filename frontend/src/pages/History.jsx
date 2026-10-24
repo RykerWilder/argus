@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Trash2 } from "lucide-react";
 import Header, { Bracket, Footer } from "../components/Header";
-import ToolsMenu from "../components/ToolsMenu";
 import IconButton from "../components/IconButton";
 import { HISTORY_EVENT, clearHistory, deleteHistoryEntry, fetchHistory } from "../lib/history";
 import { classify, resultPath } from "../lib/target";
@@ -99,12 +98,7 @@ export default function History() {
 
   return (
     <div className="page page--history">
-      <Header>
-        <ToolsMenu />
-        <Link to="/sources" className="nav-link">Sources</Link>
-        <Link to="/settings" className="nav-link">Settings</Link>
-        <Bracket as={Link} to="/">New search</Bracket>
-      </Header>
+      <Header />
 
       <main className="history">
         <div className="history__head">

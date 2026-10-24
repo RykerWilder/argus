@@ -1,7 +1,5 @@
 import { useEffect } from "react";
-import { Link } from "react-router-dom";
 import Header, { Bracket, Footer } from "../components/Header";
-import ToolsMenu from "../components/ToolsMenu";
 
 const DATA_SOURCES = [
   {
@@ -85,12 +83,7 @@ export default function Sources() {
 
   return (
     <div className="page page--sources">
-      <Header>
-        <ToolsMenu />
-        <Link to="/history" className="nav-link">History</Link>
-        <Link to="/settings" className="nav-link">Settings</Link>
-        <Bracket as={Link} to="/">New search</Bracket>
-      </Header>
+      <Header />
 
       <main className="sources">
         <h1>Sources</h1>

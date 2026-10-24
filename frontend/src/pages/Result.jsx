@@ -3,7 +3,6 @@ import { ChartSpline, List } from "lucide-react";
 import IconButton from "../components/IconButton";
 import { Link, useParams } from "react-router-dom";
 import Header, { Bracket, Footer } from "../components/Header";
-import ToolsMenu from "../components/ToolsMenu";
 import LookupProgress from "../components/LookupProgress";
 import WorldMap from "../components/WorldMap";
 import ReportTimeline from "../components/ReportTimeline";
@@ -46,11 +45,6 @@ export default function Result() {
     <div className="page page--result">
       <Header>
         <QuickSearch current={`/ip/${encodeURIComponent(ip)}`} />
-        <ToolsMenu className="nav-link--hide-sm" />
-        <Link to="/history" className="nav-link nav-link--hide-sm">History</Link>
-        <Link to="/sources" className="nav-link nav-link--hide-sm">Sources</Link>
-        <Link to="/settings" className="nav-link nav-link--hide-sm">Settings</Link>
-        <Bracket as={Link} to="/">New search</Bracket>
       </Header>
 
       <main>
