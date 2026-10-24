@@ -10,13 +10,34 @@ import "./styles.css";
 // vengono scaricate solo quando servono (code splitting per route).
 import Home from "./pages/Home";
 
-const Result = lazy(() => import("./pages/Result"));
-const DomainResult = lazy(() => import("./pages/DomainResult"));
-const Sources = lazy(() => import("./pages/Sources"));
-const History = lazy(() => import("./pages/History"));
-const EmailAnalyzer = lazy(() => import("./pages/EmailAnalyzer"));
-const Settings = lazy(() => import("./pages/Settings"));
-const NotFound = lazy(() => import("./pages/NotFound"));
+const loaders = {
+  Result: () => import("./pages/Result"),
+  DomainResult: () => import("./pages/DomainResult"),
+  Sources: () => import("./pages/Sources"),
+  History: () => import("./pages/History"),
+  EmailAnalyzer: () => import("./pages/EmailAnalyzer"),
+  Settings: () => import("./pages/Settings"),
+  NotFound: () => import("./pages/NotFound"),
+};
+
+const Result = lazy(loaders.Result);
+const DomainResult = lazy(loaders.DomainResult);
+const Sources = lazy(loaders.Sources);
+const History = lazy(loaders.History);
+const EmailAnalyzer = lazy(loaders.EmailAnalyzer);
+const Settings = lazy(loaders.Settings);
+const NotFound = lazy(loaders.NotFound);
+
+// Quando il browser è libero scarica in anticipo le altre pagine (poche decine
+// di kB), così il cambio di pagina non aspetta la rete. Con il risparmio dati
+// attivo non si scarica nulla in anticipo.
+function preloadPages() {
+  if (navigator.connection?.saveData) return;
+  const whenIdle = window.requestIdleCallback || ((fn) => setTimeout(fn, 1500));
+  whenIdle(() => Object.values(loaders).forEach((load) => load().catch(() => {})));
+}
+if (document.readyState === "complete") preloadPages();
+else window.addEventListener("load", preloadPages, { once: true });
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>

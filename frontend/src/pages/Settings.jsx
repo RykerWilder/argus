@@ -48,7 +48,7 @@ export default function Settings({ section }) {
             </ul>
           </nav>
 
-          <section className="settings__content" aria-labelledby="settings-title">
+          <section key={current.id} className="settings__content" aria-labelledby="settings-title">
             <h2 id="settings-title">{current.label}</h2>
             <Section />
           </section>

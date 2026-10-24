@@ -3574,6 +3574,72 @@ a.history__value:hover {
   }
 }
 
+/* ── Cambio pagina ───────────────────────────────────── */
+
+/* Il contenuto della pagina (non l'header, che resta fermo) entra con una
+   dissolvenza e un leggero scorrimento verso l'alto, invece di comparire di colpo. */
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes section-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.page > main,
+.page > .site-footer {
+  animation: page-in 320ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+/* nel menu laterale delle impostazioni cambia solo la sezione a destra */
+.settings__content {
+  animation: section-in 220ms ease-out both;
+}
+
+/* ── Cambio pagina ──────────────────────────────────────
+   Ogni pagina compare con una dissolvenza e il contenuto sale di pochi pixel,
+   invece di apparire di colpo. Parte quando la pagina viene montata, cioè dopo
+   che il suo file è arrivato (le pagine si caricano a richiesta). Con
+   "riduci movimento" attivo l'animazione è disattivata dalla regola in fondo. */
+
+@keyframes page-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes page-content-in {
+  from {
+    transform: translateY(10px);
+  }
+  to {
+    transform: none;
+  }
+}
+
+.page {
+  animation: page-in 320ms ease-out both;
+}
+
+.page > main {
+  animation: page-content-in 420ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
