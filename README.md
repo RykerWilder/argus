@@ -21,11 +21,11 @@ Only the backend talks to the external services. The report contains no links to
 | Source | Used for | API key | Limit (free tier) |
 | --- | --- | --- | --- |
 | [ip-api.com](https://ip-api.com/docs) | IP geolocation and connection details; geolocation of the hops in the email analyzer | None | 45 requests/minute per IP address. Batch endpoint (email analyzer): 15 requests/minute, up to 100 IPs each |
-| [ProxyCheck.io](https://proxycheck.io/api/) | VPN, proxy, Tor, hosting and risk score | Optional (`PROXYCHECK_API_KEY`) | 100 queries/day without a key, 1,000 queries/day with a free key |
-| [AbuseIPDB](https://docs.abuseipdb.com) | Abuse confidence score, reports, connection type | Required (`ABUSEIPDB_API_KEY`) | 1,000 requests/day (checks and reports combined) |
+| [ProxyCheck.io](https://proxycheck.io/api/) | VPN, proxy, Tor, hosting and risk score | Optional | 100 queries/day without a key, 1,000 queries/day with a free key |
+| [AbuseIPDB](https://docs.abuseipdb.com) | Abuse confidence score, reports, connection type | Required | 1,000 requests/day (checks and reports combined) |
 | [Team Cymru](https://www.team-cymru.com/ip-asn-mapping) | BGP prefix (CIDR) of an IP, via DNS | None | No published limit. One DNS query per lookup |
 | [RDAP / WHOIS](https://about.rdap.org) | Domain registration, name servers, registrar | None | No fixed limit. Set by each registry |
-| [VirusTotal](https://docs.virustotal.com/reference/public-vs-premium-api) | Domain and URL reputation | Required (`VIRUSTOTAL_API_KEY`) | 4 requests/minute, 500 requests/day |
+| [VirusTotal](https://docs.virustotal.com/reference/public-vs-premium-api) | Domain and URL reputation | Required | 4 requests/minute, 500 requests/day |
 
 Notes on the limits:
 
@@ -43,14 +43,10 @@ Requirements: Docker with the Compose plugin.
 ```bash
 git clone https://github.com/RykerWilder/argus.git
 cd argus
-cp .env.example .env
-```
-
-Edit `.env` and set the API keys (see [Configuration](#configuration)), then start the stack:
-
-```bash
 docker compose up -d --build
 ```
+
+Then open the web interface and add your API keys in **Settings** (see [Configuration](#configuration)).
 
 | Service | URL |
 | --- | --- |
@@ -62,25 +58,21 @@ To stop it: `docker compose down`.
 
 ## Configuration
 
-Set these variables in `.env`:
-
-| Variable | Required | Where to get it |
-| --- | --- | --- |
-| `ABUSEIPDB_API_KEY` | For IP searches | [abuseipdb.com](https://www.abuseipdb.com) (free account) |
-| `PROXYCHECK_API_KEY` | No | [proxycheck.io](https://proxycheck.io) (raises the daily limit) |
-| `VIRUSTOTAL_API_KEY` | For domain and URL searches | [virustotal.com](https://www.virustotal.com) (free account) |
-
-A missing key disables only the source that needs it. Never commit `.env`: it is already listed in `.gitignore`.
-
-### Settings page
-
-The **Settings** entry in the header opens a page with three sections:
+Argus has no configuration files and the server stores no API keys. You enter them in the web interface: **Settings**, in the header, opens a page with three sections.
 
 - **Security**: reserved for future options.
 - **Preferences**: a toggle for each service. A service that is turned off is not queried and its panel is left out of the report. For example, turn AbuseIPDB off to search IP addresses without it.
-- **API keys**: your own keys for AbuseIPDB, ProxyCheck.io and VirusTotal. A key saved here is used instead of the one in `.env`; without one, Argus falls back to the server key.
+- **API keys**: your own keys for AbuseIPDB, ProxyCheck.io and VirusTotal.
 
-For now these settings are stored in the browser's local storage, in plain text, so they are per browser and are not shared between users. Keys saved there are sent to the Argus backend with each request, only to call the matching service.
+| Service | Key | Where to get it |
+| --- | --- | --- |
+| AbuseIPDB | Required for IP searches | [abuseipdb.com](https://www.abuseipdb.com) (free account) |
+| ProxyCheck.io | Optional (raises the daily limit) | [proxycheck.io](https://proxycheck.io) |
+| VirusTotal | Required for domain and URL searches | [virustotal.com](https://www.virustotal.com) (free account) |
+
+A missing key disables only the source that needs it: its panel reports the error and the rest of the report is still shown.
+
+For now keys and preferences are stored in the browser's local storage, in plain text, so they are per browser and are not shared between users or devices. Clearing the site data removes them. A key is sent to the Argus backend with each request, in the `X-Argus-Api-Key` header, only to call the matching service, and the backend does not keep it. Use Argus over `localhost` or HTTPS: over plain HTTP on a network the key travels unencrypted.
 
 ## API
 
@@ -95,7 +87,7 @@ Each source is a separate endpoint. IP endpoints accept `{"ip": "8.8.8.8"}`.
 | `POST /api/virustotal` | VirusTotal |
 | `POST /api/email/analyze` | Email header analyzer |
 
-Private and reserved IP addresses are rejected with HTTP 422. The full schema is available at `/docs`.
+Private and reserved IP addresses are rejected with HTTP 422. The AbuseIPDB, ProxyCheck.io and VirusTotal endpoints read the key from the `X-Argus-Api-Key` header (ProxyCheck.io works without one). The full schema is available at `/docs`.
 
 ## Usage notes
 

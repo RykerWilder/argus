@@ -24,7 +24,7 @@ class ProxyRequest(IPRequest):
 
 def _api_key(http_request: Request) -> Optional[str]:
     # La key è facoltativa: senza key ProxyCheck applica un limite giornaliero ridotto.
-    return request_api_key(http_request, "PROXYCHECK_API_KEY") or None
+    return request_api_key(http_request) or None
 
 
 def _cache_get(key: tuple) -> Optional[dict]:

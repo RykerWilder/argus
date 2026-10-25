@@ -2,7 +2,6 @@ dnspython==2.7.0
 fastapi==0.136.3
 httpx==0.28.1
 olefile==0.47
-python-dotenv==1.1.0
 python-whois==0.9.6
 tldextract==5.1.2
 uvicorn==0.48.0

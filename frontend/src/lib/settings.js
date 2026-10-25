@@ -3,8 +3,8 @@
 // dell'app passa da queste funzioni, quindi basterà cambiare qui.
 //
 // - Preferenze: quali servizi interrogare. Tutti sono attivi di default.
-// - Chiavi API: quelle inserite dall'utente. Il backend le usa al posto di
-//   quelle configurate in .env (che restano il ripiego se non ce ne sono).
+// - Chiavi API: quelle inserite dall'utente. Il server non ne conserva: ogni
+//   richiesta porta la chiave della fonte che interroga (header X-Argus-Api-Key).
 
 const PREFS_KEY = "argus:preferences:v1";
 const API_KEYS_KEY = "argus:api-keys:v1";

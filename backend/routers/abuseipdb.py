@@ -32,11 +32,11 @@ class AbuseRequest(IPRequest):
 
 
 def _api_key(http_request: Request) -> str:
-    key = request_api_key(http_request, "ABUSEIPDB_API_KEY")
+    key = request_api_key(http_request)
     if not key:
         raise HTTPException(
             status_code=503,
-            detail="No AbuseIPDB API key: add one in Settings or set ABUSEIPDB_API_KEY in .env.",
+            detail="No AbuseIPDB API key: add one in Settings, under API keys.",
         )
     return key
 

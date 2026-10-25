@@ -91,7 +91,7 @@ export default function ApiKeysSection() {
   return (
     <>
       <p className="settings__lead muted">
-        Add your own API keys. When you save one, Argus uses it for that service instead of the key configured on the server. With no key saved here it falls back to the server one, if there is any.
+        Add your own API keys. Argus sends the key you save to the matching service with each search; the server does not keep any. A service that needs a key cannot be queried until you add one here.
       </p>
       <p className="settings__note muted">
         Keys are stored in this browser&rsquo;s local storage, in plain text, and are sent to the Argus backend only to call the matching service. Anyone who can use this browser profile can read them.

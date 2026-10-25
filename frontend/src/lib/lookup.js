@@ -98,8 +98,8 @@ const SOURCE_TIMEOUT = 65_000;
 async function querySource(source, target, signal) {
   const started = performance.now();
   const elapsed = () => Math.round(performance.now() - started);
-  // Se l'utente ha salvato una chiave API per questa fonte, il backend usa
-  // quella al posto della chiave di .env.
+  // La chiave API salvata in Settings per questa fonte viaggia con la richiesta:
+  // il server non ne ha di sue.
   const apiKey = getApiKey(source.id);
   const headers = apiKey ? { [API_KEY_HEADER]: apiKey } : undefined;
   try {

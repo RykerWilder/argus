@@ -1,18 +1,15 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
-from dotenv import load_dotenv
 
-load_dotenv()
-
-from docs_theme import render_docs  # noqa: E402
-from routers import abuseipdb, domain_whois, email_analyzer, fqdn, iptracker, proxycheck, virustotal  # noqa: E402
+from docs_theme import render_docs
+from routers import abuseipdb, domain_whois, email_analyzer, fqdn, iptracker, proxycheck, virustotal
 
 # /docs è servito da docs_theme.py, con lo stesso stile del frontend.
 app = FastAPI(title="Argus API", version="2.1.0", docs_url=None)
 
 # Nessun CORS: il frontend chiama /api sulla propria origine (nginx in Docker,
-# proxy di Vite in sviluppo), quindi i siti terzi non possono usare le chiavi API
-# di Argus dal browser dell'utente.
+# proxy di Vite in sviluppo). Il server non conserva chiavi API: arrivano con
+# ogni richiesta, dalle impostazioni del browser dell'utente.
 
 
 @app.get("/health")

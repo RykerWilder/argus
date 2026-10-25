@@ -16,7 +16,7 @@ const DATA_SOURCES = [
     name: "ProxyCheck.io",
     role: "VPN, proxy and Tor detection",
     provides: "VPN, proxy, Tor, hosting, scraper and compromised-host detection, risk score, the VPN or anonymizing service operator, and network details.",
-    access: "API key optional (PROXYCHECK_API_KEY). Without a key the daily limit is lower.",
+    access: "API key optional. Without a key the daily limit is lower.",
     links: [
       { label: "Website", href: "https://proxycheck.io" },
       { label: "API docs", href: "https://proxycheck.io/api/" },
@@ -26,7 +26,7 @@ const DATA_SOURCES = [
     name: "AbuseIPDB",
     role: "Abuse reports and connection type",
     provides: "Abuse confidence score, reports and their categories, connection type (Fixed Line ISP, Mobile ISP, Data Center…), ISP, domain and Tor flag.",
-    access: "Requires a free API key (ABUSEIPDB_API_KEY).",
+    access: "Requires a free API key.",
     links: [
       { label: "Website", href: "https://www.abuseipdb.com" },
       { label: "API docs", href: "https://docs.abuseipdb.com" },
@@ -53,7 +53,7 @@ const DATA_SOURCES = [
     name: "VirusTotal",
     role: "Domain and URL reputation",
     provides: "Verdicts from 90+ security engines, reputation and community votes, categories, DNS records, HTTPS certificate, popularity and, for URLs, the redirect chain.",
-    access: "Requires a free API key (VIRUSTOTAL_API_KEY). Free plan: 4 lookups per minute, 500 per day.",
+    access: "Requires a free API key. Free plan: 4 lookups per minute, 500 per day.",
     links: [
       { label: "Website", href: "https://www.virustotal.com" },
       { label: "API docs", href: "https://docs.virustotal.com/reference/overview" },

@@ -29,11 +29,11 @@ class VTRequest(BaseModel):
 
 
 def _api_key(http_request: Request) -> str:
-    key = request_api_key(http_request, "VIRUSTOTAL_API_KEY")
+    key = request_api_key(http_request)
     if not key:
         raise HTTPException(
             status_code=503,
-            detail="No VirusTotal API key: add one in Settings or set VIRUSTOTAL_API_KEY in .env.",
+            detail="No VirusTotal API key: add one in Settings, under API keys.",
         )
     return key
 
