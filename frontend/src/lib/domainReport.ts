@@ -8,6 +8,7 @@ import type {
   Lookup,
   ResolvedIps,
   Row,
+  Verdict,
   VerdictLevel,
   VirusTotalData,
   VtCertificate,
@@ -52,6 +53,69 @@ export function span(from: string | number | Date, to: string | number | Date = 
   if (days >= 365) return plural(Math.floor(days / 365.25), "year");
   if (days >= 31) return plural(Math.floor(days / 30.44), "month");
   return plural(days, "day");
+}
+
+/**
+ * Soglie del verdetto. Un solo motore che segnala un dominio è molto spesso un
+ * falso positivo (google.com ne ha uno), quindi un'unica segnalazione isolata
+ * non basta per "Suspicious". Per i domini molto diffusi (in classifica di
+ * popolarità o con buona reputazione) le soglie sono più alte.
+ */
+export const VERDICT_THRESHOLDS = {
+  /** Peso minimo per "Suspicious" (malicious = 1, suspicious = 0.5). */
+  medium: { default: 1.5, established: 3 },
+  /** Motori "malicious" necessari per "Malicious". */
+  high: { default: 3, established: 10 },
+  /** Posizione in classifica entro cui un dominio è considerato diffuso. */
+  popularRank: 100_000,
+  /** Reputazione VirusTotal a partire dalla quale è considerato affidabile. */
+  trustedReputation: 100,
+} as const;
+
+interface VerdictInput {
+  stats: VtStats;
+  votes?: { harmless: number; malicious: number } | null;
+  reputation?: number | null;
+  popularity?: VtPopularity[];
+}
+
+export function assessVerdict({ stats, votes, reputation, popularity = [] }: VerdictInput): Verdict {
+  const T = VERDICT_THRESHOLDS;
+  const { malicious: m, suspicious: s, total } = stats;
+  const flags = m + s;
+  const rep = typeof reputation === "number" ? reputation : null;
+
+  const ranked = popularity.filter((p) => p.rank > 0).sort((a, b) => a.rank - b.rank)[0];
+  const popular = !!ranked && ranked.rank <= T.popularRank;
+  const trusted = rep !== null && rep >= T.trustedReputation;
+  const established = popular || trusted;
+
+  const votesMal = votes?.malicious ?? 0;
+  const votesOk = votes?.harmless ?? 0;
+  const communityAgrees = votesMal > votesOk;
+  const badReputation = rep !== null && rep < 0;
+
+  // peso delle prove: malicious 1, suspicious 0.5, più 1 se community o reputazione concordano
+  let weight = m + s * 0.5;
+  if (flags > 0 && (communityAgrees || badReputation)) weight += 1;
+
+  const high = m >= (established ? T.high.established : T.high.default);
+  const medium = weight >= (established ? T.medium.established : T.medium.default);
+
+  const level: VerdictLevel = high ? "high" : medium ? "medium" : "low";
+  const title = high ? "Malicious" : medium ? "Suspicious" : flags > 0 ? "Low risk" : "No threats found";
+
+  const reasons: string[] = [];
+  if (m) reasons.push(`flagged as malicious by ${m} of ${total} engines`);
+  if (s) reasons.push(`marked suspicious by ${s} ${s === 1 ? "engine" : "engines"}`);
+  if (communityAgrees) reasons.push(`${votesMal} malicious community ${votesMal === 1 ? "vote" : "votes"} (${votesOk} harmless)`);
+  if (badReputation) reasons.push(`reputation ${rep}`);
+  if (flags > 0 && !medium && !high) {
+    reasons.push("isolated detection, below the alert threshold");
+    if (popular && ranked) reasons.push(`ranked #${ranked.rank.toLocaleString("en-US")} in ${ranked.source}`);
+    if (trusted) reasons.push(`good reputation (${rep})`);
+  }
+  return { level, title, reasons };
 }
 
 const STATUS_LABELS: Record<string, string> = {
@@ -153,19 +217,11 @@ export function buildDomainReport(lookup: Lookup): DomainReport {
 
   // ── Verdetto ─────────────────────────────────
   const stats = vt?.found ? vt.stats || NO_STATS : null;
-  let level: VerdictLevel = "unknown";
-  let title = "Not assessed";
-  const reasons: string[] = [];
-  if (vt && !vt.found) title = "Not in VirusTotal";
-  else if (vt?.status === "queued") title = "Analysis queued";
+  let verdict: Verdict = { level: "unknown", title: "Not assessed", reasons: [] };
+  if (vt && !vt.found) verdict = { ...verdict, title: "Not in VirusTotal" };
+  else if (vt?.status === "queued") verdict = { ...verdict, title: "Analysis queued" };
   else if (vt && stats) {
-    if (stats.malicious >= 3) [level, title] = ["high", "Malicious"];
-    else if (stats.malicious > 0 || stats.suspicious > 0) [level, title] = ["medium", "Suspicious"];
-    else [level, title] = ["low", "No threats found"];
-    if (stats.malicious) reasons.push(`${stats.malicious} ${stats.malicious === 1 ? "engine flags" : "engines flag"} it as malicious`);
-    if (stats.suspicious) reasons.push(`${stats.suspicious} as suspicious`);
-    if (vt.votes?.malicious) reasons.push(`${vt.votes.malicious} malicious community ${vt.votes.malicious === 1 ? "vote" : "votes"}`);
-    if (typeof vt.reputation === "number" && vt.reputation < 0) reasons.push(`reputation ${vt.reputation}`);
+    verdict = assessVerdict({ stats, votes: vt.votes, reputation: vt.reputation, popularity });
   }
 
   // ── Dati chiave ──────────────────────────────
@@ -191,7 +247,7 @@ export function buildDomainReport(lookup: Lookup): DomainReport {
       label: "Detections",
       value: stats?.total ? `${stats.malicious} / ${stats.total}` : vt && !vt.found ? "No record" : vt?.status === "queued" ? "Queued" : null,
       sub: stats?.total ? (stats.malicious ? "Engines flagging it as malicious" : "No engine flags it as malicious") : null,
-      detected: !!stats?.malicious,
+      detected: verdict.level === "medium" || verdict.level === "high",
     },
   ];
 
@@ -204,7 +260,7 @@ export function buildDomainReport(lookup: Lookup): DomainReport {
     title: host,
     subtitle: target.kind === "url" ? target.value : null,
     hostIsIp: target.kind === "url" && target.hostIsIp,
-    verdict: { level, title, reasons },
+    verdict,
     detectionScore: stats?.total ? { value: stats.malicious, suffix: `/${stats.total}`, percent: (stats.malicious / stats.total) * 100 } : null,
     reputation: vt?.found && typeof vt.reputation === "number" ? vt.reputation : null,
     highlights,
