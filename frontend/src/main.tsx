@@ -9,6 +9,9 @@ import "./styles.css";
 // La home è nel bundle principale: è la prima pagina che si vede. Le altre
 // vengono scaricate solo quando servono (code splitting per route).
 import Home from "./pages/Home";
+import { pruneApiKeys } from "./lib/settings";
+
+pruneApiKeys();
 
 const loaders = {
   Result: () => import("./pages/Result"),

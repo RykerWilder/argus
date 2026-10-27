@@ -41,13 +41,6 @@ export const API_KEY_SERVICES: ApiKeyService[] = [
     href: "https://proxycheck.io/dashboard",
   },
   {
-    id: "shodan",
-    name: "Shodan",
-    required: false,
-    note: "Optional. Without a key Argus uses Shodan InternetDB (ports, software and CVEs). With a key it shows everything Shodan holds on the IP: services, banners, certificates and more. If your plan does not allow host lookups, Argus falls back to InternetDB.",
-    href: "https://account.shodan.io",
-  },
-  {
     id: "virustotal",
     name: "VirusTotal",
     required: true,
@@ -103,6 +96,20 @@ export function setApiKey(id: string, value: string | null | undefined): void {
   const clean = (value || "").trim();
   if (clean) keys[id] = clean;
   else delete keys[id];
+  write(API_KEYS_KEY, keys);
+}
+
+/**
+ * Toglie le chiavi salvate per servizi che non accettano più una chiave (per
+ * esempio Shodan, che ora si usa solo senza). In Settings non c'è più un campo
+ * per cancellarle e non devono restare nel browser.
+ */
+export function pruneApiKeys(): void {
+  const keys = read(API_KEYS_KEY);
+  const known = new Set<string>(API_KEY_SERVICES.map((s) => s.id));
+  const stale = Object.keys(keys).filter((id) => !known.has(id));
+  if (stale.length === 0) return;
+  for (const id of stale) delete keys[id];
   write(API_KEYS_KEY, keys);
 }
 

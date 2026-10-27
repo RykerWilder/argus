@@ -87,34 +87,9 @@ export function exportModel(report: Report, target: Target): ExportModel {
         ]),
       });
     }
-    const shodan = report.panels.find((p) => p.id === "shodan");
-    if (shodan?.vulns?.length) {
-      const detailed = shodan.vulns.some((v) => v.cvss !== null || v.summary);
-      extra.push(
-        detailed
-          ? {
-              title: "Shodan potential CVEs",
-              columns: ["CVE", "CVSS", "Verified", "Ports", "Summary"],
-              rows: shodan.vulns.map((v) => [v.id, v.cvss !== null ? v.cvss.toFixed(1) : "", v.verified ? "Yes" : "", v.ports.join(", "), v.summary || ""]),
-            }
-          : { title: "Shodan potential CVEs", columns: ["CVE"], rows: shodan.vulns.map((v) => [v.id]) },
-      );
-    }
-    if (shodan?.services?.length) {
-      const name = (s: (typeof shodan.services)[number]) => `${s.port ?? ""}${s.transport ? `/${s.transport}` : ""}`;
-      extra.push({
-        title: "Shodan services",
-        columns: ["Port", "Product", "Version", "Module", "Last seen", "CVEs"],
-        rows: shodan.services.map((s) => [name(s), s.product || "", s.version || "", s.module || "", s.timestamp || "", String(s.vulns.length || "")]),
-      });
-      extra.push({
-        title: "Shodan service details",
-        columns: ["Service", "Section", "Field", "Value"],
-        rows: shodan.services.flatMap((s) => [
-          ...s.sections.flatMap((sec) => sec.rows.map((r) => [name(s), sec.title, r.label, r.value])),
-          ...(s.banner ? [[name(s), "Banner", "Raw banner", s.banner]] : []),
-        ]),
-      });
+    const shodanVulns = report.panels.find((p) => p.id === "shodan")?.vulns;
+    if (shodanVulns?.length) {
+      extra.push({ title: "Shodan potential CVEs", columns: ["CVE"], rows: shodanVulns.map((id) => [id]) });
     }
   } else if (isDomainReport(report)) {
     const ips = [...(report.resolves?.ipv4 || []), ...(report.resolves?.ipv6 || [])];
