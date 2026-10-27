@@ -141,17 +141,72 @@ export interface ProxyLocation {
   timezone?: string | null;
 }
 
-/** POST /api/shodan (Shodan InternetDB). Senza dati su un IP: found false e liste vuote. */
+/** Un servizio in ascolto su una porta (solo con la API key di Shodan). */
+export interface ShodanService {
+  port: number | null;
+  transport: string | null;
+  module: string | null;
+  product: string | null;
+  version: string | null;
+  timestamp: string | null;
+  tags: string[];
+  /** Identificativi delle CVE di questo servizio. */
+  vulns: string[];
+  /** Righe già pronte, raggruppate: Service, HTTP, TLS, SSH. */
+  sections: { title: string; rows: Row[] }[];
+  /** Il banner grezzo del servizio. */
+  banner: string | null;
+}
+
+export interface ShodanVulnDetail {
+  id: string;
+  cvss: number | null;
+  summary: string | null;
+  verified: boolean | null;
+  ports: number[];
+  /** Altri campi di Shodan sulla CVE (es. "Epss: 0.5"). */
+  extra: string | null;
+}
+
+export interface ShodanLocation {
+  country: string | null;
+  countryCode: string | null;
+  city: string | null;
+  region: string | null;
+  postalCode: string | null;
+  lat: number | null;
+  lon: number | null;
+}
+
+/**
+ * POST /api/shodan. Senza API key (source "internetdb") ci sono solo porte,
+ * hostname, tag, CVE e software; con la key (source "api") anche il resto.
+ * Senza dati su un IP: found false e liste vuote.
+ */
 export interface ShodanData {
   ip: string;
   found: boolean;
+  source: "api" | "internetdb";
+  /** Es. il piano della key non permette la ricerca: si mostrano i dati InternetDB. */
+  warning: string | null;
   ports: number[];
   hostnames: string[];
+  domains: string[];
   tags: string[];
-  /** Identificativi CVE, dal più recente. */
+  /** Identificativi CVE, dalla più grave. */
   vulns: string[];
   /** Software rilevato, in formato CPE (es. "cpe:/a:nginx:nginx:1.18.0"). */
   cpes: string[];
+  org: string | null;
+  isp: string | null;
+  asn: string | null;
+  os: string | null;
+  lastUpdate: string | null;
+  location: ShodanLocation | null;
+  services: ShodanService[];
+  vulnDetails: ShodanVulnDetail[];
+  /** Altri campi che Shodan restituisce sull'host. */
+  extra: Row[];
 }
 
 /** POST /api/proxycheck */
@@ -389,7 +444,8 @@ export interface IpReportPanel extends ReportPanelBase {
   totalReports?: number;
   remarks?: string[];
   // Shodan
-  vulns?: string[];
+  vulns?: ShodanVulnDetail[];
+  services?: ShodanService[];
   /** Testo mostrato al posto delle righe quando la fonte non ha dati. */
   emptyText?: string;
 }

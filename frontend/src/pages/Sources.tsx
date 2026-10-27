@@ -43,11 +43,11 @@ const DATA_SOURCES: DataSource[] = [
   {
     name: "Shodan",
     role: "Open ports, services and known CVEs",
-    provides: "Open ports, hostnames, tags, detected software and the CVEs matched to its versions, from Shodan InternetDB. An IP Shodan has never seen simply has no data.",
-    access: "Free, no API key. Non-commercial use only; the data is refreshed weekly.",
+    provides: "Without a key, from Shodan InternetDB: open ports, hostnames, tags, detected software and the CVEs matched to its versions. With a key, everything Shodan holds on the host: each service with its banner, HTTP, TLS certificate and SSH details, operating system, organization, location and the CVEs with their CVSS score. An IP Shodan has never seen simply has no data.",
+    access: "API key optional. InternetDB is free for non-commercial use and refreshed weekly. The full lookup needs a key whose plan allows host lookups (1 request per second); otherwise Argus falls back to InternetDB.",
     links: [
       { label: "InternetDB", href: "https://internetdb.shodan.io" },
-      { label: "Website", href: "https://www.shodan.io" },
+      { label: "API docs", href: "https://developer.shodan.io/api" },
     ],
   },
   {

@@ -41,6 +41,13 @@ export const API_KEY_SERVICES: ApiKeyService[] = [
     href: "https://proxycheck.io/dashboard",
   },
   {
+    id: "shodan",
+    name: "Shodan",
+    required: false,
+    note: "Optional. Without a key Argus uses Shodan InternetDB (ports, software and CVEs). With a key it shows everything Shodan holds on the IP: services, banners, certificates and more. If your plan does not allow host lookups, Argus falls back to InternetDB.",
+    href: "https://account.shodan.io",
+  },
+  {
     id: "virustotal",
     name: "VirusTotal",
     required: true,

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ChartSpline, List } from "lucide-react";
 import IconButton from "../components/IconButton";
 import { Link, useParams } from "react-router-dom";
-import type { IpReport, IpReportPanel, IpTarget, ProxyOperator, SourceId } from "../types";
+import type { IpReport, IpReportPanel, IpTarget, ProxyOperator, ShodanService, ShodanVulnDetail, SourceId } from "../types";
 import Header, { Bracket, Footer } from "../components/Header";
 import LookupProgress from "../components/LookupProgress";
 import WorldMap from "../components/WorldMap";
@@ -167,7 +167,24 @@ function textOf(panel: IpReportPanel, ip: string): string {
     });
   }
   if (panel.vulns?.length) {
-    sections.push({ title: "Potential vulnerabilities", lines: panel.vulns });
+    sections.push({
+      title: "Potential vulnerabilities",
+      lines: panel.vulns.map((v) =>
+        [v.id, v.cvss !== null && `CVSS ${v.cvss.toFixed(1)}`, v.verified && "verified", v.ports.length > 0 && `port ${v.ports.join(", ")}`]
+          .filter(Boolean)
+          .join(" ") + (v.summary ? ` — ${v.summary}` : "") + (v.extra ? ` (${v.extra})` : ""),
+      ),
+    });
+  }
+  for (const s of panel.services ?? []) {
+    sections.push({
+      title: `Service ${serviceTitle(s)}`,
+      lines: textLines([
+        ...s.sections.flatMap((sec) => sec.rows.map((r) => `${sec.title} · ${r.label}: ${r.value.replace(/\n/g, ", ")}`)),
+        s.vulns.length > 0 && `Potential vulnerabilities: ${s.vulns.join(", ")}`,
+        ...(s.banner ? ["Banner:", ...s.banner.split(/\r?\n/).map((l) => `  ${l}`)] : []),
+      ]),
+    });
   }
   if (panel.categories?.length) {
     sections.push({ title: "Reported for", lines: panel.categories.map((c) => `${c.name}: ${c.count}`) });
@@ -190,6 +207,7 @@ function SourcePanel({ panel, ip }: { panel: IpReportPanel; ip: string }) {
   const categories = panel.categories ?? [];
   const remarks = panel.remarks ?? [];
   const vulns = panel.vulns ?? [];
+  const services = panel.services ?? [];
   const aside = timeline || vulns.length > 0;
   const [asList, setAsList] = useState(false);
 
@@ -226,6 +244,7 @@ function SourcePanel({ panel, ip }: { panel: IpReportPanel; ip: string }) {
       {failed ? (
         <p className="panel__error">{panel.error}</p>
       ) : (
+        <>
         <div className={aside ? "source-panel__split source-panel__split--aside" : undefined}>
           <div>
             {panel.warning && <p className="panel__warning">{panel.warning}</p>}
@@ -256,8 +275,10 @@ function SourcePanel({ panel, ip }: { panel: IpReportPanel; ip: string }) {
               days={panel.reportWindow ?? 90}
             />
           )}
-          {!timeline && vulns.length > 0 && <Vulnerabilities ids={vulns} />}
+          {!timeline && vulns.length > 0 && <Vulnerabilities items={vulns} />}
         </div>
+        {services.length > 0 && <Services items={services} />}
+        </>
       )}
     </section>
   );
@@ -291,28 +312,109 @@ function Operator({ op }: { op: ProxyOperator }) {
 
 const VULNS_SHOWN = 12;
 
-function Vulnerabilities({ ids }: { ids: string[] }) {
+function Vulnerabilities({ items }: { items: ShodanVulnDetail[] }) {
+  // senza la key di Shodan ci sono solo gli ID: un elenco compatto
+  const detailed = items.some((v) => v.cvss !== null || v.summary);
   // solo testo: il report non contiene link a siti di terzi
-  const item = (id: string) => (
-    <li key={id} className="mono">
-      {id}
-    </li>
-  );
-  const rest = ids.slice(VULNS_SHOWN);
+  const item = (v: ShodanVulnDetail) =>
+    detailed ? (
+      <li key={v.id} className="vuln">
+        <p className="vuln__head">
+          <span className="mono">{v.id}</span>
+          {v.cvss !== null && <span className="vuln__score mono">CVSS {v.cvss.toFixed(1)}</span>}
+          {v.verified && <span className="vuln__score mono">Verified</span>}
+          {v.ports.length > 0 && <span className="muted">port {v.ports.join(", ")}</span>}
+        </p>
+        {v.summary && <p className="vuln__text muted">{v.summary}</p>}
+        {v.extra && <p className="vuln__text vuln__text--small mono muted">{v.extra}</p>}
+      </li>
+    ) : (
+      <li key={v.id} className="mono">
+        {v.id}
+      </li>
+    );
+  const list = (rows: ShodanVulnDetail[]) => <ul className={detailed ? "vuln-list" : "vulns__list"}>{rows.map(item)}</ul>;
+  const rest = items.slice(VULNS_SHOWN);
   return (
     <div className="subsection vulns">
       <h3>
         <span>Potential vulnerabilities</span>
-        <span className="mono">{ids.length}</span>
+        <span className="mono">{items.length}</span>
       </h3>
       <p className="vulns__note muted">Matched from the software versions Shodan detected, not confirmed on this host.</p>
-      <ul className="vulns__list">{ids.slice(0, VULNS_SHOWN).map(item)}</ul>
+      {list(items.slice(0, VULNS_SHOWN))}
       {rest.length > 0 && (
         <details className="remarks">
           <summary>Show {rest.length} more</summary>
-          <ul className="vulns__list">{rest.map(item)}</ul>
+          {list(rest)}
         </details>
       )}
+    </div>
+  );
+}
+
+function serviceTitle(s: ShodanService): string {
+  const where = s.port !== null ? `${s.port}${s.transport ? `/${s.transport}` : ""}` : s.transport || "";
+  const what = [s.product, s.version].filter(Boolean).join(" ") || s.module || "";
+  return [where, what].filter(Boolean).join(" ") || "Unknown service";
+}
+
+function Services({ items }: { items: ShodanService[] }) {
+  return (
+    <div className="subsection shodan-services">
+      <h3>
+        <span>Services</span>
+        <span className="mono">{items.length}</span>
+      </h3>
+      <ul className="service-list">
+        {items.map((s, i) => {
+          const where = s.port !== null ? `${s.port}${s.transport ? `/${s.transport}` : ""}` : s.transport || "—";
+          const what = [s.product, s.version].filter(Boolean).join(" ") || "Unknown service";
+          return (
+            <li key={`${s.port}-${s.transport}-${i}`}>
+              <details className="service">
+                <summary>
+                  <span className="service__port mono">{where}</span>
+                  <span className="service__name">{what}</span>
+                  {s.module && <span className="service__tag mono">{s.module}</span>}
+                  {s.vulns.length > 0 && (
+                    <span className="service__tag service__tag--alert mono">
+                      {s.vulns.length} {s.vulns.length === 1 ? "CVE" : "CVEs"}
+                    </span>
+                  )}
+                  {s.timestamp && <span className="service__time muted mono">{s.timestamp}</span>}
+                </summary>
+                <div className="service__body">
+                  {s.sections.map((sec) => (
+                    <div key={sec.title} className="subsection">
+                      <h3>{sec.title}</h3>
+                      <Rows rows={sec.rows} />
+                    </div>
+                  ))}
+                  {s.tags.length > 0 && (
+                    <div className="subsection">
+                      <h3>Tags</h3>
+                      <p className="mono">{s.tags.join(", ")}</p>
+                    </div>
+                  )}
+                  {s.vulns.length > 0 && (
+                    <div className="subsection">
+                      <h3>Potential vulnerabilities</h3>
+                      <p className="mono service__vulns">{s.vulns.join(", ")}</p>
+                    </div>
+                  )}
+                  {s.banner && (
+                    <div className="subsection">
+                      <h3>Banner</h3>
+                      <pre className="banner">{s.banner}</pre>
+                    </div>
+                  )}
+                </div>
+              </details>
+            </li>
+          );
+        })}
+      </ul>
     </div>
   );
 }

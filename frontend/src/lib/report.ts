@@ -18,6 +18,7 @@ import type {
   ProxyLocation,
   ProxyNetwork,
   Row,
+  ShodanVulnDetail,
   SourceError,
   SourceId,
   Verdict,
@@ -302,23 +303,46 @@ export function buildReport(lookup: Lookup): IpReport {
   // ── Shodan ────────────────────────────────────
   {
     const p = panelBuilder(seen, "shodan");
-    const vulns = shodan?.vulns ?? [];
+    // senza la key di Shodan arrivano solo gli ID delle CVE, con la key anche i dettagli
+    const vulns: ShodanVulnDetail[] = shodan?.vulnDetails?.length
+      ? shodan.vulnDetails
+      : (shodan?.vulns ?? []).map((id) => ({ id, cvss: null, summary: null, verified: null, ports: [], extra: null }));
     if (shodan?.found) {
+      const SL = shodan.location;
       p.add("Open ports", shodan.ports.join(", "), { mono: true, highlight: true });
+      p.add("Organization", shodan.org, { key: "org" });
+      p.add("ISP", shodan.isp, { key: "isp" });
+      p.add("Autonomous system", normalizeAsn(shodan.asn), { key: "asn", cmp: normalizeAsn(shodan.asn), mono: true });
+      p.add("Operating system", shodan.os);
       // un IP può avere molti hostname: una sola riga, senza quello già mostrato da un'altra fonte
       const known = seen.get("hostname")?.norm;
       const names = shodan.hostnames.filter((h) => h.toLowerCase() !== known);
       p.add(names.length === 1 ? "Hostname" : "Hostnames", names.slice(0, SHODAN_ROW_LIMIT).join("\n"), { mono: true });
       if (names.length > SHODAN_ROW_LIMIT) p.add("More hostnames", String(names.length - SHODAN_ROW_LIMIT), { mono: true });
+      // i risultati salvati in cache prima dell'aggiunta della key non hanno questo campo
+      p.add("Domains", (shodan.domains ?? []).slice(0, SHODAN_ROW_LIMIT).join("\n"), { mono: true });
       p.add("Tags", shodan.tags.join(", "));
+      if (SL) {
+        p.add("Country", formatCountry(SL.countryCode), { key: "country", cmp: SL.countryCode?.toUpperCase() });
+        // Shodan dà il codice della regione ("CA"), le altre fonti il nome: non si confrontano
+        p.add("Region code", SL.region);
+        p.add("City", SL.city, { key: "city", cmp: SL.city && placeKey(SL.city), same: samePlace });
+        p.add("Postal code", SL.postalCode, { mono: true });
+        const where = coordinates(SL.lat, SL.lon);
+        if (where) p.add("Coordinates", where.text, { key: "coords", cmp: where.cmp, mono: true });
+      }
+      p.add("Last update", shodan.lastUpdate);
       const software = [...new Set(shodan.cpes.map(cpeLabel))];
       p.add("Software", software.slice(0, SHODAN_ROW_LIMIT).join("\n"));
       if (software.length > SHODAN_ROW_LIMIT) p.add("More software", String(software.length - SHODAN_ROW_LIMIT), { mono: true });
       p.add("Potential CVEs", vulns.length ? String(vulns.length) : null, { mono: true, highlight: true });
+      for (const r of shodan.extra ?? []) p.add(r.label, r.value, { mono: r.mono });
     }
     panels.shodan = {
       rows: p.rows,
       vulns,
+      services: shodan?.services ?? [],
+      warning: shodan?.warning || null,
       emptyText: shodan && !shodan.found ? "Shodan has no data on this address: it has not seen any open ports or services." : undefined,
     };
   }

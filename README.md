@@ -23,18 +23,18 @@ Only the backend talks to the external services. The report contains no links to
 | [ip-api.com](https://ip-api.com/docs) | IP geolocation and connection details; geolocation of the hops in the email analyzer | None | 45 requests/minute per IP address. Batch endpoint (email analyzer): 15 requests/minute, up to 100 IPs each |
 | [ProxyCheck.io](https://proxycheck.io/api/) | VPN, proxy, Tor, hosting and risk score | Optional | 100 queries/day without a key, 1,000 queries/day with a free key |
 | [AbuseIPDB](https://docs.abuseipdb.com) | Abuse confidence score, reports, connection type | Required | 1,000 requests/day (checks and reports combined) |
-| [Shodan InternetDB](https://internetdb.shodan.io) | Open ports, hostnames, tags, detected software and potential CVEs of an IP | None | No published limit. Free for non-commercial use only; data refreshed weekly |
+| [Shodan](https://developer.shodan.io/api) | Open ports, services, banners, TLS and SSH details, software and potential CVEs of an IP | Optional | Without a key, [InternetDB](https://internetdb.shodan.io): no published limit, non-commercial use only, data refreshed weekly. With a key, the host API: 1 request/second, if the plan allows host lookups (otherwise Argus falls back to InternetDB) |
 | [Team Cymru](https://www.team-cymru.com/ip-asn-mapping) | BGP prefix (CIDR) of an IP, via DNS | None | No published limit. One DNS query per lookup |
 | [RDAP / WHOIS](https://about.rdap.org) | Domain registration, name servers, registrar | None | No fixed limit. Set by each registry |
 | [VirusTotal](https://docs.virustotal.com/reference/public-vs-premium-api) | Domain and URL reputation | Required | 4 requests/minute, 500 requests/day |
 
 Notes on the limits:
 
-- A single IP search sends one request to ip-api.com, ProxyCheck.io, AbuseIPDB and Shodan InternetDB. The lowest limit applies: in practice 1,000 IP searches per day with free keys.
+- A single IP search sends one request to ip-api.com, ProxyCheck.io, AbuseIPDB and Shodan. The lowest limit applies: in practice 1,000 IP searches per day with free keys.
 - A single domain or URL search can use up to 4 VirusTotal requests, so the per-minute limit can be reached by one search.
 - When a source answers HTTP 429 its panel reports the error and the rest of the report is still shown.
 - Results are cached for 10 minutes in the browser session, and repeated searches in that window do not consume quota. Failed sources are retried on the next search.
-- The free ip-api.com endpoint is HTTP only and not allowed for commercial use. Shodan InternetDB is free for non-commercial use only. The free VirusTotal API is not allowed for commercial use either.
+- The free ip-api.com endpoint is HTTP only and not allowed for commercial use. Shodan InternetDB is free for non-commercial use only, and the Shodan host API needs a plan that allows commercial use if you use Argus commercially. The free VirusTotal API is not allowed for commercial use either.
 - Limits are set by the providers and may change. Check their documentation before relying on them.
 
 ## Installation
@@ -63,12 +63,13 @@ Argus has no configuration files and the server stores no API keys. You enter th
 
 - **Security**: reserved for future options.
 - **Preferences**: a toggle for each service. A service that is turned off is not queried and its panel is left out of the report. For example, turn AbuseIPDB off to search IP addresses without it.
-- **API keys**: your own keys for AbuseIPDB, ProxyCheck.io and VirusTotal.
+- **API keys**: your own keys for AbuseIPDB, ProxyCheck.io, Shodan and VirusTotal.
 
 | Service | Key | Where to get it |
 | --- | --- | --- |
 | AbuseIPDB | Required for IP searches | [abuseipdb.com](https://www.abuseipdb.com) (free account) |
 | ProxyCheck.io | Optional (raises the daily limit) | [proxycheck.io](https://proxycheck.io) |
+| Shodan | Optional (full host data instead of InternetDB) | [account.shodan.io](https://account.shodan.io) |
 | VirusTotal | Required for domain and URL searches | [virustotal.com](https://www.virustotal.com) (free account) |
 
 A missing key disables only the source that needs it: its panel reports the error and the rest of the report is still shown.
@@ -84,12 +85,12 @@ Each source is a separate endpoint. IP endpoints accept `{"ip": "8.8.8.8"}`.
 | `POST /api/iptracker` | ip-api.com and Team Cymru |
 | `POST /api/proxycheck` | ProxyCheck.io |
 | `POST /api/abuseipdb` | AbuseIPDB |
-| `POST /api/shodan` | Shodan InternetDB |
+| `POST /api/shodan` | Shodan (InternetDB, or the host API with a key) |
 | `POST /api/domain-whois` | RDAP / WHOIS for domains |
 | `POST /api/virustotal` | VirusTotal |
 | `POST /api/email/analyze` | Email header analyzer |
 
-Private and reserved IP addresses are rejected with HTTP 422. The AbuseIPDB, ProxyCheck.io and VirusTotal endpoints read the key from the `X-Argus-Api-Key` header (ProxyCheck.io works without one). The full schema is available at `/docs`.
+Private and reserved IP addresses are rejected with HTTP 422. The AbuseIPDB, ProxyCheck.io, Shodan and VirusTotal endpoints read the key from the `X-Argus-Api-Key` header (ProxyCheck.io and Shodan work without one). The full schema is available at `/docs`.
 
 ## Usage notes
 
