@@ -4,6 +4,10 @@ import { Bracket } from "../Header";
 import { API_KEY_PATTERN, API_KEY_SERVICES, getApiKey, setApiKey } from "../../lib/settings";
 import type { ApiKeyService } from "../../lib/settings";
 
+// Prima le chiavi obbligatorie, poi quelle facoltative; a parità resta l'ordine
+// di API_KEY_SERVICES.
+const ORDERED_SERVICES = [...API_KEY_SERVICES].sort((a, b) => Number(b.required) - Number(a.required));
+
 function KeyRow({ service }: { service: ApiKeyService }) {
   const [saved, setSaved] = useState(() => getApiKey(service.id));
   const [draft, setDraft] = useState(saved);
@@ -99,7 +103,7 @@ export default function ApiKeysSection() {
         Keys are stored in this browser&rsquo;s local storage, in plain text, and are sent to the Argus backend only to call the matching service. Anyone who can use this browser profile can read them.
       </p>
       <ul className="keyrow-list">
-        {API_KEY_SERVICES.map((s) => (
+        {ORDERED_SERVICES.map((s) => (
           <KeyRow key={s.id} service={s} />
         ))}
       </ul>

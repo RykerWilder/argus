@@ -63,14 +63,14 @@ Argus has no configuration files and the server stores no API keys. You enter th
 
 - **Security**: reserved for future options.
 - **Preferences**: a toggle for each service. A service that is turned off is not queried and its panel is left out of the report. For example, turn AbuseIPDB off to search IP addresses without it.
-- **API keys**: your own keys for AbuseIPDB, ProxyCheck.io, Shodan and VirusTotal.
+- **API keys**: your own keys for AbuseIPDB and VirusTotal (required), ProxyCheck.io and Shodan (optional).
 
 | Service | Key | Where to get it |
 | --- | --- | --- |
 | AbuseIPDB | Required for IP searches | [abuseipdb.com](https://www.abuseipdb.com) (free account) |
+| VirusTotal | Required for domain and URL searches | [virustotal.com](https://www.virustotal.com) (free account) |
 | ProxyCheck.io | Optional (raises the daily limit) | [proxycheck.io](https://proxycheck.io) |
 | Shodan | Optional (full host data instead of InternetDB) | [account.shodan.io](https://account.shodan.io) |
-| VirusTotal | Required for domain and URL searches | [virustotal.com](https://www.virustotal.com) (free account) |
 
 A missing key disables only the source that needs it: its panel reports the error and the rest of the report is still shown.
 
