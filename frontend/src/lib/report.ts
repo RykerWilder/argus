@@ -105,6 +105,29 @@ function coordinates(latValue: unknown, lonValue: unknown): { text: string; cmp:
   return { text: `${lat.toFixed(4)}, ${lon.toFixed(4)}`, cmp: `${lat.toFixed(1)},${lon.toFixed(1)}` };
 }
 
+/**
+ * Software di un host in forma leggibile, da un CPE ("cpe:/a:apache:http_server:2.4.41"
+ * oppure "cpe:2.3:a:apache:http_server:2.4.41:*:…" → "apache http server 2.4.41").
+ */
+export function cpeLabel(cpe: string): string {
+  const fields = cpe.startsWith("cpe:2.3:") ? cpe.split(":").slice(3) : cpe.replace(/^cpe:\/?/, "").split(":").slice(1);
+  const clean = (v: string): string => {
+    let text = v;
+    try {
+      text = decodeURIComponent(v);
+    } catch {
+      // sequenza % non valida: si tiene il testo com'è
+    }
+    return text.replace(/_/g, " ").trim();
+  };
+  const [vendor, product, version] = fields.map(clean).map((f) => (f === "-" || f === "*" ? "" : f));
+  const parts = [vendor === product ? "" : vendor, product, version].filter(Boolean);
+  return parts.length ? parts.join(" ") : cpe;
+}
+
+/** Quante righe di hostname e software si mostrano prima di riassumere il resto. */
+const SHODAN_ROW_LIMIT = 8;
+
 interface SeenValue {
   norm: string;
   source: string;
@@ -164,6 +187,7 @@ export function buildReport(lookup: Lookup): IpReport {
   const geo = dataOf(results, "iptracker");
   const pc = dataOf(results, "proxycheck");
   const abuse = dataOf(results, "abuseipdb");
+  const shodan = dataOf(results, "shodan");
 
   const L: IpLocation = geo?.location ?? {};
   const C: IpConnection = geo?.connection ?? {};
@@ -272,6 +296,30 @@ export function buildReport(lookup: Lookup): IpReport {
       daily: abuse ? abuse.daily || dailyFromReports(abuse.reports || [], abuse.maxAgeInDays || 90) : [],
       reportsReceived: abuse?.reportsReceived ?? abuse?.reports?.length ?? 0,
       totalReports: abuse?.totalReports ?? 0,
+    };
+  }
+
+  // ── Shodan ────────────────────────────────────
+  {
+    const p = panelBuilder(seen, "shodan");
+    const vulns = shodan?.vulns ?? [];
+    if (shodan?.found) {
+      p.add("Open ports", shodan.ports.join(", "), { mono: true, highlight: true });
+      // un IP può avere molti hostname: una sola riga, senza quello già mostrato da un'altra fonte
+      const known = seen.get("hostname")?.norm;
+      const names = shodan.hostnames.filter((h) => h.toLowerCase() !== known);
+      p.add(names.length === 1 ? "Hostname" : "Hostnames", names.slice(0, SHODAN_ROW_LIMIT).join("\n"), { mono: true });
+      if (names.length > SHODAN_ROW_LIMIT) p.add("More hostnames", String(names.length - SHODAN_ROW_LIMIT), { mono: true });
+      p.add("Tags", shodan.tags.join(", "));
+      const software = [...new Set(shodan.cpes.map(cpeLabel))];
+      p.add("Software", software.slice(0, SHODAN_ROW_LIMIT).join("\n"));
+      if (software.length > SHODAN_ROW_LIMIT) p.add("More software", String(software.length - SHODAN_ROW_LIMIT), { mono: true });
+      p.add("Potential CVEs", vulns.length ? String(vulns.length) : null, { mono: true, highlight: true });
+    }
+    panels.shodan = {
+      rows: p.rows,
+      vulns,
+      emptyText: shodan && !shodan.found ? "Shodan has no data on this address: it has not seen any open ports or services." : undefined,
     };
   }
 

@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 
 from docs_theme import render_docs
-from routers import abuseipdb, domain_whois, email_analyzer, fqdn, iptracker, proxycheck, virustotal
+from routers import abuseipdb, domain_whois, email_analyzer, fqdn, iptracker, proxycheck, shodan, virustotal
 
 # /docs è servito da docs_theme.py, con lo stesso stile del frontend.
 app = FastAPI(title="Argus API", version="2.1.0", docs_url=None)
@@ -28,6 +28,7 @@ def docs(request: Request) -> HTMLResponse:
 app.include_router(iptracker.router, prefix="/api/iptracker", tags=["IP"])
 app.include_router(abuseipdb.router, prefix="/api/abuseipdb", tags=["IP"])
 app.include_router(proxycheck.router, prefix="/api/proxycheck", tags=["IP"])
+app.include_router(shodan.router, prefix="/api/shodan", tags=["IP"])
 
 # Domini e URL
 app.include_router(domain_whois.router, prefix="/api/domain-whois", tags=["Domain"])

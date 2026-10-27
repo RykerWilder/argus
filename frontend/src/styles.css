@@ -893,20 +893,22 @@ input {
 }
 
 /* Risultato IP: a sinistra mappa e ProxyCheck.io, a destra ip-api.com,
-   sotto AbuseIPDB a tutta larghezza */
+   sotto AbuseIPDB e Shodan a tutta larghezza */
 .source-grid--ip {
   grid-template-areas:
     "map iptracker"
     "proxycheck iptracker"
-    "abuseipdb abuseipdb";
-  grid-template-rows: minmax(300px, 1fr) auto auto;
+    "abuseipdb abuseipdb"
+    "shodan shodan";
+  grid-template-rows: minmax(300px, 1fr) auto auto auto;
 }
 
 .source-grid--ip.source-grid--pc-right {
   grid-template-areas:
     "map proxycheck"
     "iptracker proxycheck"
-    "abuseipdb abuseipdb";
+    "abuseipdb abuseipdb"
+    "shodan shodan";
 }
 
 .source-grid--ip > .result-map {
@@ -923,6 +925,10 @@ input {
 
 .source-grid--ip > .source-panel--abuseipdb {
   grid-area: abuseipdb;
+}
+
+.source-grid--ip > .source-panel--shodan {
+  grid-area: shodan;
 }
 
 .source-panel__split {
@@ -1229,10 +1235,34 @@ input {
   white-space: pre-wrap;
 }
 
-/* Riquadro AbuseIPDB con timeline: dati a sinistra, grafico a destra */
-.source-panel__split--timeline {
+/* Riquadri con una colonna a parte (timeline di AbuseIPDB, CVE di Shodan):
+   dati a sinistra, grafico o elenco a destra */
+.source-panel__split--aside {
   grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
   align-items: start;
+}
+
+.source-panel__split > .vulns {
+  margin-top: 0;
+}
+
+.vulns__note {
+  margin: 0 0 12px;
+  font-size: 14px;
+}
+
+.vulns__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 14px;
+}
+
+.vulns .remarks .vulns__list {
+  margin-top: 8px;
 }
 
 .timeline.timeline--compact {
@@ -2988,6 +3018,10 @@ a.history__value:hover {
     margin-top: 28px;
   }
 
+  .source-panel__split > .vulns {
+    margin-top: 28px;
+  }
+
   .result-map,
   .result-map .worldmap--interactive {
     min-height: 0;
@@ -2995,7 +3029,7 @@ a.history__value:hover {
   }
 
   .source-grid--ip {
-    grid-template-areas: "map" "iptracker" "proxycheck" "abuseipdb";
+    grid-template-areas: "map" "iptracker" "proxycheck" "abuseipdb" "shodan";
     grid-template-rows: none;
   }
 

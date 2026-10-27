@@ -40,7 +40,7 @@ export interface TargetRef {
 
 // ── Fonti ──────────────────────────────────────────────────
 
-export type SourceId = "iptracker" | "proxycheck" | "abuseipdb" | "domainwhois" | "virustotal";
+export type SourceId = "iptracker" | "proxycheck" | "abuseipdb" | "shodan" | "domainwhois" | "virustotal";
 
 export interface Source {
   id: SourceId;
@@ -139,6 +139,19 @@ export interface ProxyLocation {
   lat?: number | string | null;
   lon?: number | string | null;
   timezone?: string | null;
+}
+
+/** POST /api/shodan (Shodan InternetDB). Senza dati su un IP: found false e liste vuote. */
+export interface ShodanData {
+  ip: string;
+  found: boolean;
+  ports: number[];
+  hostnames: string[];
+  tags: string[];
+  /** Identificativi CVE, dal più recente. */
+  vulns: string[];
+  /** Software rilevato, in formato CPE (es. "cpe:/a:nginx:nginx:1.18.0"). */
+  cpes: string[];
 }
 
 /** POST /api/proxycheck */
@@ -300,6 +313,7 @@ export interface SourceDataMap {
   iptracker: IpTrackerData;
   proxycheck: ProxyCheckData;
   abuseipdb: AbuseIpdbData;
+  shodan: ShodanData;
   domainwhois: DomainWhoisData;
   virustotal: VirusTotalData;
 }
@@ -374,6 +388,10 @@ export interface IpReportPanel extends ReportPanelBase {
   reportsReceived?: number;
   totalReports?: number;
   remarks?: string[];
+  // Shodan
+  vulns?: string[];
+  /** Testo mostrato al posto delle righe quando la fonte non ha dati. */
+  emptyText?: string;
 }
 
 export interface IpReport {

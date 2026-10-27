@@ -20,6 +20,7 @@ export const IP_SOURCES: Source[] = [
   { id: "iptracker", name: "ip-api.com", covers: "Location and connection" },
   { id: "proxycheck", name: "ProxyCheck.io", covers: "VPN, proxy and Tor detection" },
   { id: "abuseipdb", name: "AbuseIPDB", covers: "Abuse reports and connection type" },
+  { id: "shodan", name: "Shodan", covers: "Open ports, services and known CVEs" },
 ];
 
 // Domini e URL

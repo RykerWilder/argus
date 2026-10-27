@@ -14,6 +14,8 @@ export function sourceLink(sourceId: SourceId, target: Target): SourceLink | nul
       return { label: "Open on AbuseIPDB", href: `https://www.abuseipdb.com/check/${v}` };
     case "proxycheck":
       return { label: "Open on ProxyCheck.io", href: `https://proxycheck.io/threats/${v}` };
+    case "shodan":
+      return { label: "Open on Shodan", href: `https://www.shodan.io/host/${v}` };
     case "iptracker":
       // ip-api.com non ha una pagina per IP: si apre la risposta ufficiale per quell'IP
       return { label: "Open on ip-api.com", href: `http://ip-api.com/json/${v}` };

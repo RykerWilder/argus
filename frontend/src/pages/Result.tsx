@@ -166,6 +166,9 @@ function textOf(panel: IpReportPanel, ip: string): string {
       ]),
     });
   }
+  if (panel.vulns?.length) {
+    sections.push({ title: "Potential vulnerabilities", lines: panel.vulns });
+  }
   if (panel.categories?.length) {
     sections.push({ title: "Reported for", lines: panel.categories.map((c) => `${c.name}: ${c.count}`) });
   }
@@ -186,6 +189,8 @@ function SourcePanel({ panel, ip }: { panel: IpReportPanel; ip: string }) {
   const timeline = panel.id === "abuseipdb" && !!panel.daily?.some((d) => d.count > 0);
   const categories = panel.categories ?? [];
   const remarks = panel.remarks ?? [];
+  const vulns = panel.vulns ?? [];
+  const aside = timeline || vulns.length > 0;
   const [asList, setAsList] = useState(false);
 
   return (
@@ -221,11 +226,11 @@ function SourcePanel({ panel, ip }: { panel: IpReportPanel; ip: string }) {
       {failed ? (
         <p className="panel__error">{panel.error}</p>
       ) : (
-        <div className={timeline ? "source-panel__split source-panel__split--timeline" : undefined}>
+        <div className={aside ? "source-panel__split source-panel__split--aside" : undefined}>
           <div>
             {panel.warning && <p className="panel__warning">{panel.warning}</p>}
             {panel.rows.length === 0 ? (
-              <p className="panel__empty muted">Everything this source returned is already shown above.</p>
+              <p className="panel__empty muted">{panel.emptyText ?? "Everything this source returned is already shown above."}</p>
             ) : (
               <Rows rows={panel.rows} />
             )}
@@ -251,6 +256,7 @@ function SourcePanel({ panel, ip }: { panel: IpReportPanel; ip: string }) {
               days={panel.reportWindow ?? 90}
             />
           )}
+          {!timeline && vulns.length > 0 && <Vulnerabilities ids={vulns} />}
         </div>
       )}
     </section>
@@ -279,6 +285,34 @@ function Operator({ op }: { op: ProxyOperator }) {
     <div className="subsection">
       <h3>Anonymizing service</h3>
       <Rows rows={rows} />
+    </div>
+  );
+}
+
+const VULNS_SHOWN = 12;
+
+function Vulnerabilities({ ids }: { ids: string[] }) {
+  // solo testo: il report non contiene link a siti di terzi
+  const item = (id: string) => (
+    <li key={id} className="mono">
+      {id}
+    </li>
+  );
+  const rest = ids.slice(VULNS_SHOWN);
+  return (
+    <div className="subsection vulns">
+      <h3>
+        <span>Potential vulnerabilities</span>
+        <span className="mono">{ids.length}</span>
+      </h3>
+      <p className="vulns__note muted">Matched from the software versions Shodan detected, not confirmed on this host.</p>
+      <ul className="vulns__list">{ids.slice(0, VULNS_SHOWN).map(item)}</ul>
+      {rest.length > 0 && (
+        <details className="remarks">
+          <summary>Show {rest.length} more</summary>
+          <ul className="vulns__list">{rest.map(item)}</ul>
+        </details>
+      )}
     </div>
   );
 }

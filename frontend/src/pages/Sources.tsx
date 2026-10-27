@@ -41,6 +41,16 @@ const DATA_SOURCES: DataSource[] = [
     ],
   },
   {
+    name: "Shodan",
+    role: "Open ports, services and known CVEs",
+    provides: "Open ports, hostnames, tags, detected software and the CVEs matched to its versions, from Shodan InternetDB. An IP Shodan has never seen simply has no data.",
+    access: "Free, no API key. Non-commercial use only; the data is refreshed weekly.",
+    links: [
+      { label: "InternetDB", href: "https://internetdb.shodan.io" },
+      { label: "Website", href: "https://www.shodan.io" },
+    ],
+  },
+  {
     name: "Team Cymru",
     role: "Network block (CIDR)",
     provides: "The BGP prefix an IP address belongs to, with its size, first and last address and regional registry. One DNS query per lookup.",
@@ -96,7 +106,7 @@ export default function Sources() {
       <main className="sources">
         <h1>Sources</h1>
         <p className="sources__lead muted">
-          Argus queries these services in parallel through its backend: ip-api.com, Team Cymru, ProxyCheck.io and AbuseIPDB for IP addresses, WHOIS and VirusTotal for domains and URLs.
+          Argus queries these services in parallel through its backend: ip-api.com, Team Cymru, ProxyCheck.io, AbuseIPDB and Shodan for IP addresses, WHOIS and VirusTotal for domains and URLs.
         </p>
 
         <ul className="source-list">

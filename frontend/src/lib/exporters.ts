@@ -87,6 +87,10 @@ export function exportModel(report: Report, target: Target): ExportModel {
         ]),
       });
     }
+    const shodanVulns = report.panels.find((p) => p.id === "shodan")?.vulns;
+    if (shodanVulns?.length) {
+      extra.push({ title: "Shodan potential CVEs", columns: ["CVE"], rows: shodanVulns.map((id) => [id]) });
+    }
   } else if (isDomainReport(report)) {
     const ips = [...(report.resolves?.ipv4 || []), ...(report.resolves?.ipv6 || [])];
     if (ips.length) extra.push({ title: "Resolves to", columns: ["IP address"], rows: ips.map((ip) => [ip]) });
