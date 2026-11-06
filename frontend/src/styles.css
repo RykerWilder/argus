@@ -1099,11 +1099,26 @@ input {
 
 .categories li {
   display: grid;
-  grid-template-columns: minmax(120px, 38%) 1fr 36px;
+  grid-template-columns: minmax(110px, 1.6fr) minmax(24px, 1fr) 28px 40px;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
   padding: 6px 0;
   font-size: 15px;
+  transition: opacity 0.15s;
+}
+
+/* Le colonne della lista sono condivise dalle righe (nomi su una riga, barre allineate) */
+@supports (grid-template-columns: subgrid) {
+  .categories ul {
+    display: grid;
+    grid-template-columns: max-content minmax(24px, 1fr) auto auto;
+    column-gap: 14px;
+  }
+
+  .categories li {
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
+  }
 }
 
 .categories li .mono {
@@ -1120,6 +1135,126 @@ input {
   display: block;
   height: 100%;
   background: var(--text);
+}
+
+.categories li .categories__share {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* Colori delle fette: solo la palette di Argus. Una rampa del verde mint dell'accento, dal più
+   chiaro (la categoria più segnalata) al più scuro, e il grigio "muted" per "Other".
+   La rampa ha una sola tinta e le fette sono ordinate per numero: la luminosità dice l'ordine.
+   Validata sullo sfondo scuro (passi di luminosità distinti, contrasto >= 3:1 con lo sfondo).
+   Giallo e rosso non si usano: in Argus indicano avvisi ed errori. */
+.categories {
+  --pie-1: var(--accent);
+  --pie-2: #16d9a6;
+  --pie-3: #0cb589;
+  --pie-4: #039271;
+  --pie-5: #01775a;
+  --pie-other: var(--muted);
+}
+
+.categories__body {
+  display: grid;
+  grid-template-columns: 148px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px 28px;
+}
+
+.categories__pie {
+  position: relative;
+  width: 148px;
+  height: 148px;
+}
+
+.categories__pie svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* 2px di sfondo tra le fette: è il bordo a separarle, non un contorno colorato */
+.pie__slice {
+  stroke: var(--bg);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  outline: none;
+  transform-origin: 80px 80px;
+  transition:
+    opacity 0.15s,
+    transform 0.15s;
+}
+
+.pie__slice.is-active {
+  transform: scale(1.04);
+}
+
+.pie__slice.is-dim,
+.categories li.is-dim {
+  opacity: 0.45;
+}
+
+.pie__tip {
+  position: absolute;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  font-size: 13px;
+  line-height: 1.35;
+  pointer-events: none;
+  white-space: nowrap;
+  transform: translate(-50%, calc(-100% - 14px));
+}
+
+.pie__tip strong {
+  font-weight: 500;
+  font-size: 15px;
+}
+
+.pie__tip span {
+  color: var(--muted);
+}
+
+.categories__name {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.categories__swatch {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+
+.categories__note {
+  margin: 12px 0 0;
+  font-size: 13px;
+}
+
+@media (max-width: 640px) {
+  .categories__body {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: start;
+  }
+
+  .categories ul,
+  .categories li {
+    column-gap: 10px;
+  }
+
+  .categories__name {
+    gap: 8px;
+  }
 }
 
 .remarks {

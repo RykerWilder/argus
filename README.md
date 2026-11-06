@@ -9,7 +9,7 @@
 
 Argus is a self-hosted threat intelligence lookup tool. It queries several public sources in parallel and merges the answers into a single report.
 
-- **IP addresses**: location, ISP and network block, VPN/proxy/Tor detection, abuse reports and connection type, open ports, detected software and potential CVEs, with an interactive world map.
+- **IP addresses**: location, ISP and network block, VPN/proxy/Tor detection, abuse reports with a pie chart of their categories, connection type, open ports, detected software and potential CVEs, with an interactive world map.
 - **Domains and URLs**: registration data, DNS records and reputation from 90+ security engines.
 - **Email headers**: analysis of a pasted header or an `.eml` / `.msg` file, with the route of the message on a map. Nothing is stored.
 - **History**: the latest searches, kept only in your browser.

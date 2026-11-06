@@ -7,8 +7,10 @@ import Header, { Bracket, Footer } from "../components/Header";
 import LookupProgress from "../components/LookupProgress";
 import WorldMap from "../components/WorldMap";
 import ReportTimeline from "../components/ReportTimeline";
+import CategoryPie from "../components/CategoryPie";
 import ActionBar from "../components/ActionBar";
 import PanelTools from "../components/PanelTools";
+import { fmtShare, legendFor, pieSlices } from "../lib/categoryPie";
 import { sourceLink } from "../lib/panelLinks";
 import { recordSearch } from "../lib/history";
 import { panelText, textLines } from "../lib/panelText";
@@ -235,7 +237,7 @@ function SourcePanel({ panel, ip }: { panel: IpReportPanel; ip: string }) {
               <Rows rows={panel.rows} />
             )}
             {panel.operator && <Operator op={panel.operator} />}
-            {categories.length > 0 && <Categories items={categories} />}
+            {categories.length > 0 && <Categories items={categories} received={panel.reportsReceived ?? 0} total={panel.totalReports ?? 0} />}
             {remarks.length > 0 && (
               <details className="remarks">
                 <summary>Registry remarks</summary>
@@ -317,22 +319,57 @@ function Vulnerabilities({ ids }: { ids: string[] }) {
   );
 }
 
-function Categories({ items }: { items: { name: string; count: number }[] }) {
+interface CategoriesProps {
+  items: { name: string; count: number }[];
+  /** Report ricevuti da AbuseIPDB con il dettaglio, e totale dichiarato per l'IP. */
+  received: number;
+  total: number;
+}
+
+// Si mostra solo se l'IP ha report con categorie (il chiamante controlla `items`).
+// Torta e lista sono lo stesso dato: passando sopra una fetta o una riga si evidenzia l'altra.
+function Categories({ items, received, total }: CategoriesProps) {
+  const slices = useMemo(() => pieSlices(items), [items]);
+  const legend = useMemo(() => legendFor(slices), [slices]);
+  const [active, setActive] = useState<string | null>(null);
   const max = Math.max(...items.map((c) => c.count));
+  const sum = items.reduce((s, c) => s + c.count, 0) || 1;
+  const partial = received > 0 && total > received;
+
   return (
     <div className="subsection categories">
       <h3>Reported for</h3>
-      <ul>
-        {items.map((c) => (
-          <li key={c.name}>
-            <span>{c.name}</span>
-            <span className="categories__bar" aria-hidden="true">
-              <span style={{ width: `${(c.count / max) * 100}%` }} />
-            </span>
-            <span className="mono">{c.count}</span>
-          </li>
-        ))}
-      </ul>
+      <div className="categories__body">
+        <CategoryPie slices={slices} active={active} onActive={setActive} />
+        <ul>
+          {items.map((c) => {
+            const entry = legend.get(c.name);
+            const state = active === null ? "" : entry?.slice === active ? " is-active" : " is-dim";
+            return (
+              <li
+                key={c.name}
+                className={`categories__item${state}`}
+                onPointerEnter={() => entry && setActive(entry.slice)}
+                onPointerLeave={() => setActive(null)}
+              >
+                <span className="categories__name">
+                  <i className="categories__swatch" style={{ background: entry?.color }} aria-hidden="true" />
+                  {c.name}
+                </span>
+                <span className="categories__bar" aria-hidden="true">
+                  <span style={{ width: `${(c.count / max) * 100}%` }} />
+                </span>
+                <span className="mono">{c.count}</span>
+                <span className="categories__share mono">{fmtShare(c.count / sum)}</span>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+      <p className="categories__note muted">
+        The chart counts categories, not reports: a report can have more than one.
+        {partial && ` Based on the ${received} most recent reports out of ${total}.`}
+      </p>
     </div>
   );
 }
