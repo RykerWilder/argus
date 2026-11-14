@@ -1,92 +1,38 @@
-# Python
-__pycache__/
-*.py[cod]
-*.pyo
-*.pyd
-*.egg
-*.egg-info/
-dist/
-build/
-eggs/
-wheels/
-sdist/
-develop-eggs/
-.installed.cfg
-lib/
-!frontend/src/lib/
-lib64/
-
-# Virtual environments
-.venv/
-venv/
-env/
-ENV/
-
-# Environment variables
+# Secrets and local configuration
 .env
 .env.*
 !.env.example
+certs/
 
-# Distribution / packaging
-MANIFEST
+# Runtime data: the Argus and Authelia databases hold users, password hashes and
+# encrypted API keys. They move by copying the folder (see the README, "Backup").
+/data/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
 
-# Testing
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
 .pytest_cache/
+.mypy_cache/
 .coverage
 htmlcov/
-.tox/
 
-# Type checkers
-.mypy_cache/
-.dmypy.json
-.pytype/
-.pyre/
+# Node
+node_modules/
+dist/
+.vite/
+*.tsbuildinfo
 
-# IDEs
+# Editors, OS and logs
 .idea/
 .vscode/
 *.swp
-*.swo
 .DS_Store
-
-# Logs
 *.log
-logs/
-
-# Jupyter
-.ipynb_checkpoints/
-*.ipynb
-
-# ─── React / Node ───────────────────────────────────────────
-
-# Dependencies
-node_modules/
-.pnp
-.pnp.js
-
-# Build output
-dist/
-build/
-out/
-
-# Environment variables (already covered above, but explicit for CRA/Vite)
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# Testing
-coverage/
-
-# Cache
-.npm
-.eslintcache
-.stylelintcache
-.parcel-cache/
-.vite/
-.turbo/
-
-*.tsbuildinfo
-next-env.d.ts
-# Node
-node_modules/
