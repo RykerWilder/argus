@@ -5,3 +5,8 @@ venv
 .env
 .env.*
 .DS_Store
+# Development databases hold hashes and encrypted keys: keep them out of the image
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3

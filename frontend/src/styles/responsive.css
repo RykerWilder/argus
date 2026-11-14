@@ -1,0 +1,185 @@
+@media (max-width: 1180px) {
+  .result-head {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .verdict {
+    max-width: 520px;
+  }
+}
+
+@media (max-width: 960px) {
+
+  .source-grid,
+  .source-panel__split {
+    grid-template-columns: 1fr;
+  }
+
+  .source-panel__split {
+    gap: 0;
+  }
+
+  .timeline.timeline--compact {
+    margin-top: 28px;
+  }
+
+  .source-panel__split > .vulns {
+    margin-top: 28px;
+  }
+
+  .result-map,
+  .result-map .worldmap--interactive {
+    min-height: 0;
+    height: clamp(240px, 60vw, 340px);
+  }
+
+  .source-grid--ip {
+    grid-template-areas: "map" "iptracker" "proxycheck" "abuseipdb" "shodan";
+    grid-template-rows: none;
+  }
+
+  .source-list li {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .history__item {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "kind remove" "main main" "verdict when";
+    gap: 8px 12px;
+  }
+
+  .history__kind {
+    grid-area: kind;
+  }
+
+  .history__main {
+    grid-area: main;
+  }
+
+  .history__verdict {
+    grid-area: verdict;
+  }
+
+  .history__when {
+    grid-area: when;
+  }
+
+  .history__remove {
+    grid-area: remove;
+  }
+
+  .source-links {
+    flex-direction: row;
+    gap: 20px;
+  }
+
+  .highlights {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .highlight:nth-child(3) {
+    border-left: 0;
+  }
+
+  .highlight:nth-child(n + 3) {
+    border-top: 1px solid var(--line);
+  }
+
+  .rows--cols {
+    grid-template-columns: 1fr;
+  }
+
+  .rows--cols .rows__item:nth-child(2) {
+    border-top: 1px solid var(--line-soft);
+  }
+}
+
+@media (max-width: 640px) {
+  :root {
+    --grid: 48px;
+  }
+
+  .site-header {
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+
+  .site-header__nav {
+    gap: 18px;
+  }
+
+  .page--result .site-header__nav {
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+
+  /* the quick search takes the first row on its own, the entries go below */
+  .quick-search {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+
+  .quick-search input {
+    width: 100%;
+  }
+
+  .search__form {
+    flex-direction: column;
+  }
+
+  .highlights {
+    grid-template-columns: 1fr;
+  }
+
+  .highlight {
+    border-left: 0;
+  }
+
+  .highlight:nth-child(n + 2) {
+    border-top: 1px solid var(--line);
+  }
+
+  .worldmap__controls {
+    top: 8px;
+    right: 8px;
+  }
+
+  .worldmap__controls button {
+    min-width: 34px;
+    padding: 0 9px;
+    font-size: 12px;
+  }
+
+  .search__form input {
+    min-height: 60px;
+  }
+
+  .btn {
+    min-height: 54px;
+  }
+
+  .progress__item {
+    grid-template-columns: 10px 1fr auto;
+  }
+
+  .progress__covers {
+    display: none;
+  }
+
+  .panel {
+    padding: 20px 18px 24px;
+  }
+
+  .rows__item {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+
+  .reports li {
+    grid-template-columns: 1fr;
+    row-gap: 4px;
+  }
+}

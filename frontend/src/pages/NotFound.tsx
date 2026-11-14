@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import Header, { Footer } from "../components/Header";
+import Header, { Footer } from "../components/layout/Header";
 
-// Pagina 404. Lo zero di "404" è un occhio (Argo aveva cento occhi) la cui
-// iride segue il cursore; un clic sull'occhio lo fa ammiccare e cambia frase.
+// 404 page. The zero of "404" is an eye (Argus had a hundred eyes) whose iris follows the
+// cursor; a click on the eye makes it blink and changes the phrase.
 
 const LINES = [
   "Argus has a hundred eyes. None of them found this page.",
@@ -13,7 +13,7 @@ const LINES = [
   "This path is clean: there is nothing on it.",
 ];
 
-// Escursione massima dell'iride dentro l'occhio, in unità del viewBox.
+// Maximum excursion of the iris inside the eye, in viewBox units.
 const REACH_X = 20;
 const REACH_Y = 38;
 
@@ -28,7 +28,7 @@ function Eye404({ onBlink }: { onBlink: () => void }) {
       const iris = irisRef.current;
       if (!svg || !iris) return;
       const r = svg.getBoundingClientRect();
-      // centro dell'occhio: 260/520 della larghezza, 110/220 dell'altezza
+      // center of the eye: 260/520 of the width, 110/220 of the height
       const cx = r.left + r.width * (260 / 520);
       const cy = r.top + r.height * (110 / 220);
       let nx = (e.clientX - cx) / (window.innerWidth * 0.35);
@@ -48,7 +48,7 @@ function Eye404({ onBlink }: { onBlink: () => void }) {
     const eye = eyeRef.current;
     if (eye) {
       eye.classList.remove("is-blinking");
-      void eye.getBoundingClientRect(); // riavvia l'animazione
+      void eye.getBoundingClientRect();  // restart the animation
       eye.classList.add("is-blinking");
     }
     onBlink();

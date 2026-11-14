@@ -1,0 +1,191 @@
+.page--home {
+  position: relative;
+  overflow: hidden;
+}
+
+.page--home > main {
+  position: relative;
+  z-index: 1;
+}
+
+/* the header (and its dropdown menus) sits above the page content */
+.site-header {
+  position: relative;
+  z-index: 20;
+}
+
+.page--home > main {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-bottom: 12vh;
+}
+
+/* Animated background map */
+.network-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.page--home::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse 60% 45% at 50% 46%, rgba(21, 21, 21, 0.82), rgba(21, 21, 21, 0) 70%);
+}
+
+.page--home .progress {
+  padding: 16px 18px 4px;
+  border: 1px solid var(--line);
+  background: rgba(21, 21, 21, 0.92);
+}
+
+.search {
+  width: min(880px, 100%);
+  margin: 0 auto;
+}
+
+.search__title {
+  margin: 0 0 20px;
+  font-weight: 300;
+  font-size: clamp(28px, 3.2vw, 44px);
+  line-height: 1.1;
+  letter-spacing: -0.035em;
+}
+
+.search__form {
+  display: flex;
+  border: 1px solid var(--line);
+  background: rgba(21, 21, 21, 0.85);
+  backdrop-filter: blur(6px);
+  transition: border-color 140ms ease;
+}
+
+.search__form:focus-within {
+  border-color: #4a4a47;
+}
+
+.search__form.has-error {
+  border-color: var(--danger);
+}
+
+.search__form input {
+  flex: 1;
+  min-width: 0;
+  padding: 0 24px;
+  border: 0;
+  background: transparent;
+  font-family: var(--mono);
+  font-size: clamp(16px, 1.6vw, 20px);
+  outline: none;
+}
+
+.search__form input::placeholder {
+  color: var(--dim);
+}
+
+.search__form input:disabled {
+  color: var(--muted);
+}
+
+.search__aside {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 16px;
+}
+
+.search__error {
+  margin: 12px 0 0;
+  color: var(--danger);
+  font-size: 15px;
+}
+
+/* Lookup progress */
+.progress {
+  margin-top: 22px;
+}
+
+.progress__title {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 0 0 10px;
+  font-size: 15px;
+}
+
+.progress__count {
+  color: var(--muted);
+}
+
+.progress__bar {
+  height: 2px;
+  background: var(--line);
+}
+
+.progress__bar span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  transition: width 260ms ease;
+}
+
+.progress__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.progress__item {
+  display: grid;
+  grid-template-columns: 10px 140px 1fr auto;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line-soft);
+  font-size: 15px;
+}
+
+.progress__covers {
+  color: var(--muted);
+}
+
+.progress__state {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.progress__dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background: var(--dim);
+}
+
+.is-pending .progress__dot {
+  background: var(--accent);
+  animation: blink 900ms steps(2, jump-none) infinite;
+}
+
+.is-ok .progress__dot {
+  background: var(--accent);
+}
+
+.is-error .progress__dot {
+  background: var(--danger);
+}
+
+.is-error .progress__state {
+  color: var(--danger);
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0.2;
+  }
+}

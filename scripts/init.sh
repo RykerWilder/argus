@@ -1,0 +1,254 @@
+#!/usr/bin/env bash
+# Prepares Argus for its first start:
+#   1. creates .env with random secrets (if it does not exist yet)
+#   2. creates a local certificate authority and an HTTPS certificate in ./certs,
+#      valid for <domain> and auth.<domain> (if missing)
+#   3. creates ./data/argus and ./data/authelia, where the databases live (real files)
+#
+# Usage:  ./scripts/init.sh [--domain argus.localhost] [--port 443] [--policy one_factor]
+#                           [--bind 127.0.0.1] [--no-certs]
+#
+# Safe to run again: it never overwrites an existing .env or certificate.
+# Works with macOS and Linux bash; on Windows use Git Bash or WSL.
+set -euo pipefail
+
+DOMAIN="argus.localhost"
+PORT="443"
+POLICY="one_factor"
+BIND="127.0.0.1"
+MAKE_CERTS=1
+
+usage() {
+    cat <<'USAGE'
+Prepares Argus for its first start: creates .env with random secrets, a local HTTPS
+certificate in ./certs and the ./data folders for the databases. Existing files are
+never overwritten.
+
+Usage: ./scripts/init.sh [options]
+  --domain NAME    domain of Argus, the login is on auth.NAME (default: argus.localhost)
+  --port N         HTTPS port published on the host (default: 443)
+  --policy P       one_factor (password) or two_factor (password + TOTP code)
+  --bind ADDRESS   host address to listen on (default: 127.0.0.1, this computer only)
+  --no-certs       do not create a certificate: you bring your own in ./certs
+USAGE
+    exit "${1:-0}"
+}
+
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --domain)   DOMAIN="${2:-}"; shift 2 ;;
+        --port)     PORT="${2:-}"; shift 2 ;;
+        --policy)   POLICY="${2:-}"; shift 2 ;;
+        --bind)     BIND="${2:-}"; shift 2 ;;
+        --no-certs) MAKE_CERTS=0; shift ;;
+        -h|--help)  usage 0 ;;
+        *)          echo "Unknown option: $1" >&2; usage 1 ;;
+    esac
+done
+
+die() { echo "Error: $*" >&2; exit 1; }
+
+command -v openssl >/dev/null 2>&1 || die "openssl is required (install it and run this script again)."
+
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$ROOT"
+
+# Reads a value from the existing .env (without running it as a script)
+env_value() { sed -n "s/^$1=//p" .env | head -n 1; }
+
+# Sets a .env variable only if it is missing or empty: a value already chosen is never touched.
+# Needed when .env comes from a copy of .env.example (empty secrets).
+FILLED=""
+fill_missing() {
+    local name="$1" value="$2"
+    [ -z "$(env_value "$name")" ] || return 0
+    if grep -q "^$name=" .env; then
+        ( umask 077
+          awk -v n="$name" -v v="$value" 'BEGIN { FS = OFS = "=" } $1 == n && $2 == "" { print n "=" v; next } { print }' .env > .env.tmp
+          mv .env.tmp .env )
+    else
+        printf '%s=%s\n' "$name" "$value" >> .env
+    fi
+    FILLED="$FILLED $name"
+}
+
+NEW_ENV=0
+if [ -f .env ]; then
+    DOMAIN="$(env_value ARGUS_DOMAIN)"
+    PORT="$(env_value ARGUS_HTTPS_PORT)"
+    [ -n "$DOMAIN" ] || die ".env exists but ARGUS_DOMAIN is empty."
+    [ -n "$PORT" ] || PORT=443
+    echo "Keeping the existing .env (domain: $DOMAIN, port: $PORT). Delete it to start over; read the README first: the secrets in it protect the saved API keys."
+
+    # A .env copied from .env.example has empty secrets: generate them, leave the rest alone
+    fill_missing ARGUS_SECRET_KEY "$(openssl rand -base64 32)"
+    fill_missing ARGUS_PROXY_SECRET "$(openssl rand -hex 32)"
+    fill_missing AUTHELIA_SESSION_SECRET "$(openssl rand -hex 32)"
+    fill_missing AUTHELIA_STORAGE_ENCRYPTION_KEY "$(openssl rand -hex 32)"
+    fill_missing AUTHELIA_IDENTITY_VALIDATION_RESET_PASSWORD_JWT_SECRET "$(openssl rand -hex 32)"
+    # ARGUS_PORT_SUFFIX may be empty (port 443): add it only if the line is missing altogether
+    if ! grep -q "^ARGUS_PORT_SUFFIX=" .env; then
+        if [ "$PORT" = "443" ]; then echo "ARGUS_PORT_SUFFIX=" >> .env; else echo "ARGUS_PORT_SUFFIX=:$PORT" >> .env; fi
+    fi
+    if [ -n "$FILLED" ]; then
+        chmod 600 .env
+        echo "Generated the secrets that were missing or empty in .env:$FILLED"
+    fi
+else
+    # Authelia needs a domain with at least one dot, not an IP address
+    case "$DOMAIN" in
+        *[!a-z0-9.-]*|.*|*.|*..*|-*) die "Invalid domain '$DOMAIN': use lowercase letters, digits, dots and dashes." ;;
+    esac
+    case "$DOMAIN" in
+        *.*) ;;
+        *) die "The domain needs a dot (for example argus.localhost): Authelia does not accept a bare name like 'localhost'." ;;
+    esac
+    case "$DOMAIN" in
+        *[!0-9.]*) ;;
+        *) die "The domain cannot be an IP address: the login cookie needs a name." ;;
+    esac
+    case "$PORT" in
+        ''|*[!0-9]*) die "Invalid port '$PORT'." ;;
+    esac
+    { [ "$PORT" -ge 1 ] && [ "$PORT" -le 65535 ]; } || die "Invalid port '$PORT'."
+    case "$POLICY" in
+        one_factor|two_factor) ;;
+        *) die "--policy must be one_factor or two_factor." ;;
+    esac
+
+    SUFFIX=""
+    [ "$PORT" = "443" ] || SUFFIX=":$PORT"
+
+    ( umask 077
+      cat > .env <<ENV
+# Generated by scripts/init.sh: it holds secrets, do not share it or commit it.
+# The options are explained in .env.example. Keep a copy of ARGUS_SECRET_KEY:
+# without it the API keys saved in the database can no longer be read.
+ARGUS_DOMAIN=$DOMAIN
+ARGUS_HTTPS_PORT=$PORT
+ARGUS_PORT_SUFFIX=$SUFFIX
+ARGUS_BIND=$BIND
+ARGUS_AUTH_POLICY=$POLICY
+
+ARGUS_SECRET_KEY=$(openssl rand -base64 32)
+ARGUS_PROXY_SECRET=$(openssl rand -hex 32)
+AUTHELIA_SESSION_SECRET=$(openssl rand -hex 32)
+AUTHELIA_STORAGE_ENCRYPTION_KEY=$(openssl rand -hex 32)
+AUTHELIA_IDENTITY_VALIDATION_RESET_PASSWORD_JWT_SECRET=$(openssl rand -hex 32)
+ENV
+    )
+    echo "Created .env with new random secrets."
+    NEW_ENV=1
+
+    # Data left by an earlier install (Docker volumes or ./data) was created with other
+    # secrets: with the new .env Authelia refuses to open its database. Better to say so now.
+    LEFTOVER=""
+    if [ -f data/authelia/db.sqlite3 ]; then
+        LEFTOVER="  ./data/authelia (the Authelia database)"
+    fi
+    if command -v docker >/dev/null 2>&1; then
+        OLD_VOLUMES="$(docker volume ls -q 2>/dev/null | grep -E '(^|_)(argus-data|authelia-data|authelia-users)$' || true)"
+        [ -z "$OLD_VOLUMES" ] || LEFTOVER="$LEFTOVER${LEFTOVER:+
+}$(printf '%s\n' "$OLD_VOLUMES" | sed 's/^/  Docker volume /')"
+    fi
+    if [ -n "$LEFTOVER" ]; then
+        cat <<WARN
+
+Warning: data from an earlier install of Argus exists:
+$LEFTOVER
+It was created with other secrets, so with this new .env Authelia refuses to start
+("the configured encryption key does not appear to be valid for this database").
+If there is nothing to keep in it, delete it before the first start (this removes the
+Authelia devices and sessions; the Argus database and its users are not touched):
+  rm -rf data/authelia        # Docker volumes: docker volume rm <name>
+To keep it, put your old .env back instead of using this one.
+WARN
+    fi
+fi
+
+SUFFIX=""
+[ "$PORT" = "443" ] || SUFFIX=":$PORT"
+
+# Created here, as your user: if Docker creates it, it does so as root and the backend cannot write to it.
+mkdir -p data/argus data/authelia
+
+# On Linux the backend must run as the owner of ./data/argus, or it cannot write the
+# database. Docker Desktop (macOS, Windows) adapts the permissions by itself.
+if [ "$(uname -s)" = "Linux" ] && [ "$(id -u)" != "1000" ] && ! grep -q "^ARGUS_UID=" .env; then
+    if [ "$(id -u)" = "0" ]; then
+        # root: the container does not run as root, so give the folder to the container's user 1000
+        chown 1000:1000 data/argus
+    else
+        printf 'ARGUS_UID=%s\nARGUS_GID=%s\n' "$(id -u)" "$(id -g)" >> .env
+        echo "Set ARGUS_UID/ARGUS_GID in .env to your user, so the backend can write ./data/argus."
+    fi
+fi
+
+# An install that keeps its data in Docker volumes (earlier versions) has to be moved to ./data.
+# Only with its own .env: a new .env has other secrets, and the old data cannot be read with them.
+if [ "$NEW_ENV" -eq 0 ] && [ ! -f data/argus/argus.db ] && command -v docker >/dev/null 2>&1 \
+   && docker volume ls -q 2>/dev/null | grep -qE '(^|_)argus-data$'; then
+    cat <<MOVE
+
+An earlier install keeps its users and API keys in a Docker volume. To move them into
+./data (stop Argus first: docker compose down), run:
+  ./scripts/migrate-volumes.sh
+MOVE
+fi
+
+if [ "$MAKE_CERTS" -eq 1 ]; then
+    mkdir -p certs
+    if [ -f certs/fullchain.pem ] && [ -f certs/privkey.pem ]; then
+        echo "Keeping the existing certificate in ./certs."
+    else
+        ( umask 077
+          cd certs
+
+          # Local authority: installed once on the computer or in the browser
+          if [ ! -f ca.pem ] || [ ! -f ca.key ]; then
+              openssl req -x509 -newkey rsa:3072 -sha256 -days 3650 -nodes \
+                  -keyout ca.key -out ca.pem -subj "/O=Argus local CA/CN=Argus local CA" \
+                  -addext "basicConstraints=critical,CA:TRUE,pathlen:0" \
+                  -addext "keyUsage=critical,keyCertSign,cRLSign" >/dev/null 2>&1
+          fi
+
+          cat > leaf.cnf <<CNF
+[req]
+distinguished_name = dn
+prompt = no
+[dn]
+O = Argus
+CN = $DOMAIN
+[ext]
+basicConstraints = critical,CA:FALSE
+keyUsage = critical,digitalSignature,keyEncipherment
+extendedKeyUsage = serverAuth
+subjectAltName = DNS:$DOMAIN,DNS:auth.$DOMAIN
+CNF
+          openssl req -new -newkey rsa:2048 -nodes -keyout privkey.pem -out leaf.csr -config leaf.cnf >/dev/null 2>&1
+          openssl x509 -req -in leaf.csr -CA ca.pem -CAkey ca.key -CAcreateserial \
+              -out leaf.pem -days 825 -sha256 -extfile leaf.cnf -extensions ext >/dev/null 2>&1
+          cat leaf.pem ca.pem > fullchain.pem
+          rm -f leaf.csr leaf.cnf leaf.pem ca.srl
+          chmod 600 ca.key privkey.pem
+          chmod 644 ca.pem fullchain.pem
+        )
+        echo "Created a certificate for $DOMAIN and auth.$DOMAIN in ./certs (valid 825 days)."
+    fi
+else
+    [ -f certs/fullchain.pem ] && [ -f certs/privkey.pem ] \
+        || echo "Put your certificate in ./certs/fullchain.pem and the key in ./certs/privkey.pem (they must cover $DOMAIN and auth.$DOMAIN)."
+fi
+
+cat <<DONE
+
+Next steps
+  1. Start Argus:           docker compose up -d --build
+  2. Create your user:      docker compose exec backend python -m app.cli add-user <username>
+  3. Open:                  https://$DOMAIN$SUFFIX
+
+The certificate comes from a local authority, so the browser warns until you trust
+./certs/ca.pem (README, "Trusting the local certificate"). If $DOMAIN does not resolve
+on this computer, add this line to /etc/hosts:
+  127.0.0.1 $DOMAIN auth.$DOMAIN
+DONE

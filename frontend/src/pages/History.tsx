@@ -2,13 +2,13 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Trash2 } from "lucide-react";
 import type { HistoryData, TargetKind } from "../types";
-import Header, { Bracket, Footer } from "../components/Header";
-import IconButton from "../components/IconButton";
-import { HISTORY_EVENT, clearHistory, deleteHistoryEntry, fetchHistory } from "../lib/history";
-import { classify, resultPath } from "../lib/target";
-import { defang } from "../lib/defang";
+import Header, { Bracket, Footer } from "../components/layout/Header";
+import IconButton from "../components/ui/IconButton";
+import { HISTORY_EVENT, clearHistory, deleteHistoryEntry, fetchHistory } from "../lib/search/history";
+import { classify, resultPath } from "../lib/search/target";
+import { defang } from "../lib/search/defang";
 
-// Ultime ricerche (IP, domini e URL) salvate in questo browser.
+// Latest searches (IP, domains and URLs) saved in this browser.
 
 const KINDS: { id: TargetKind | null; label: string }[] = [
   { id: null, label: "All" },
@@ -55,7 +55,7 @@ export default function History() {
 
   useEffect(() => {
     load();
-    // aggiornamento se la cronologia cambia in questa o in un'altra scheda
+    // refresh if the history changes in this or another tab
     const onChange = () => load();
     const onStorage = (e: StorageEvent) => {
       if (!e.key || e.key.startsWith("argus:history")) load();

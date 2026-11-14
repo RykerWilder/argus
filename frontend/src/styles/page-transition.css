@@ -1,0 +1,55 @@
+/* Page change: the page fades in and its content rises a few pixels instead of appearing at once.
+   It starts when the page mounts, that is, after its file has arrived (pages load on demand). */
+
+@keyframes page-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes page-content-in {
+  from {
+    transform: translateY(10px);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes section-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.page {
+  animation: page-in 320ms ease-out both;
+}
+
+.page > main {
+  animation: page-content-in 420ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.page > .site-footer {
+  animation: page-in 320ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+/* In the settings menu only the section on the right changes */
+.settings__content {
+  animation: section-in 220ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

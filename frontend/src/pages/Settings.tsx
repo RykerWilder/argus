@@ -1,13 +1,15 @@
 import { useEffect } from "react";
 import type { ComponentType } from "react";
 import { Link } from "react-router-dom";
-import Header, { Footer } from "../components/Header";
+import Header, { Footer } from "../components/layout/Header";
 import SecuritySection from "../components/settings/SecuritySection";
 import PreferencesSection from "../components/settings/PreferencesSection";
 import ApiKeysSection from "../components/settings/ApiKeysSection";
 
-// Impostazioni: sidebar a sinistra e, a destra, la sezione scelta.
-// Per ora le preferenze restano nel browser (localStorage, vedi lib/settings.js).
+// Settings: sidebar on the left and, on the right, the chosen section.
+// Search preferences, account, second factor and API keys live on the server, in the
+// database (see lib/user/settings.ts and lib/user/account.ts). Only the search history
+// stays in the browser.
 export const SECTIONS: { id: string; label: string; Component: ComponentType }[] = [
   { id: "security", label: "Security", Component: SecuritySection },
   { id: "preferences", label: "Preferences", Component: PreferencesSection },

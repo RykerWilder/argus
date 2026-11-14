@@ -1,0 +1,55 @@
+.icon-btn {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--accent);
+  cursor: pointer;
+  transition: border-color 140ms ease, background-color 140ms ease, color 140ms ease;
+}
+
+.icon-btn:hover,
+.icon-btn[aria-expanded="true"] {
+  border-color: var(--accent);
+  background: rgba(61, 255, 197, 0.08);
+}
+
+.icon-btn.is-done {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.icon-btn__tip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  z-index: 6;
+  padding: 5px 9px;
+  border: 1px solid var(--line);
+  background: var(--bg-raised);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, 4px);
+  transition: opacity 120ms ease, transform 120ms ease;
+}
+
+.icon-btn:hover .icon-btn__tip,
+.icon-btn:focus-visible .icon-btn__tip,
+.icon-btn.is-done .icon-btn__tip {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.icon-btn[aria-expanded="true"] .icon-btn__tip {
+  opacity: 0;
+}

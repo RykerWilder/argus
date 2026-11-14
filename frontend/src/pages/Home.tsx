@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { LookupResults, Target } from "../types";
-import Header, { Bracket, Footer } from "../components/Header";
-import LookupProgress from "../components/LookupProgress";
-import NetworkBackground from "../components/NetworkBackground";
+import Header, { Bracket, Footer } from "../components/layout/Header";
+import LookupProgress from "../components/report/LookupProgress";
+import NetworkBackground from "../components/layout/NetworkBackground";
 import { isAbortError, request } from "../lib/api";
-import { getCached, runLookup, sourcesFor } from "../lib/lookup";
-import { classify, resultPath } from "../lib/target";
+import { getCached, runLookup, sourcesFor } from "../lib/search/lookup";
+import { classify, resultPath } from "../lib/search/target";
 
 export default function Home() {
   const navigate = useNavigate();

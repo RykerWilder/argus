@@ -1,0 +1,39 @@
+.result-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px 32px;
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+
+.result-foot__note {
+  margin: 0;
+  font-size: 14px;
+}
+
+.result-foot__actions {
+  display: flex;
+  gap: 28px;
+}
+
+.empty {
+  max-width: 640px;
+  margin: 16vh auto 0;
+}
+
+.empty h1 {
+  margin: 0 0 12px;
+  font-weight: 400;
+  font-size: clamp(36px, 5vw, 64px);
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.empty p {
+  margin: 0 0 24px;
+  color: var(--muted);
+  font-size: 18px;
+}

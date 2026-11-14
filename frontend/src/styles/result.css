@@ -1,0 +1,239 @@
+.quick-search input {
+  width: clamp(180px, 22vw, 300px);
+  height: 40px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  font-family: var(--mono);
+  font-size: 14px;
+  text-transform: none;
+  letter-spacing: 0;
+  outline: none;
+}
+
+.quick-search input:focus {
+  border-color: #4a4a47;
+}
+
+.quick-search.has-error input {
+  border-color: var(--danger);
+}
+
+.quick-search input::placeholder {
+  color: var(--dim);
+}
+
+.result-loading {
+  width: min(720px, 100%);
+  margin: 12vh auto 0;
+}
+
+.result-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 400px);
+  align-items: end;
+  gap: 40px;
+  padding: clamp(24px, 5vh, 56px) 0 36px;
+}
+
+.result-head__id > .muted {
+  margin: 0 0 6px;
+  font-size: 15px;
+}
+
+.result-head__id {
+  min-width: 0;
+}
+
+/* The size is computed in ResultParts.tsx (IpHeading) by measuring the text. */
+.result-ip {
+  margin: 0;
+  font-weight: 400;
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.result-ip span {
+  display: inline-block;
+  font-size: 64px;
+  letter-spacing: -0.05em;
+}
+
+.verdict {
+  padding: 22px 24px;
+  border: 1px solid var(--line);
+  background: var(--bg-raised);
+}
+
+.verdict__title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  font-size: 26px;
+  letter-spacing: -0.02em;
+}
+
+.verdict__dot {
+  width: 12px;
+  height: 12px;
+  background: var(--dim);
+}
+
+.verdict--low .verdict__dot {
+  background: var(--accent);
+}
+
+.verdict--medium .verdict__dot {
+  background: var(--warn);
+}
+
+.verdict--high .verdict__dot {
+  background: var(--danger);
+}
+
+.verdict--high {
+  border-color: rgba(255, 107, 79, 0.5);
+}
+
+.verdict__scores {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-top: 22px;
+}
+
+.score {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.score__value {
+  font-size: 34px;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+}
+
+.score__value small {
+  margin-left: 2px;
+  font-size: 14px;
+  color: var(--muted);
+  letter-spacing: 0;
+}
+
+.score__label {
+  font-size: 13px;
+}
+
+.score__bar {
+  height: 2px;
+  margin-top: 8px;
+  background: var(--line);
+}
+
+.score__bar span {
+  display: block;
+  height: 100%;
+  background: var(--text);
+}
+
+.verdict--medium .score__bar span {
+  background: var(--warn);
+}
+
+.verdict--high .score__bar span {
+  background: var(--danger);
+}
+
+.verdict__reasons {
+  margin: 18px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.result-map {
+  position: relative;
+  display: flex;
+  min-height: 320px;
+  border: 1px solid var(--line);
+  background: rgba(21, 21, 21, 0.75);
+}
+
+/* in the grid the map takes one column and stretches like the panel next to it */
+.result-map .worldmap--interactive {
+  flex: 1 1 auto;
+  width: 100%;
+  height: auto;
+  min-height: 320px;
+}
+
+/* Key data highlighted with the accent color */
+.highlights {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border: 1px solid var(--line);
+}
+
+.highlight {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  padding: 20px 22px 22px;
+  border-left: 1px solid var(--line);
+  background: rgba(21, 21, 21, 0.9);
+}
+
+.highlight:first-child {
+  border-left: 0;
+}
+
+.highlight::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 2px;
+  background: var(--accent);
+}
+
+.highlight__label {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.highlight__value {
+  color: var(--accent);
+  font-size: clamp(20px, 1.9vw, 28px);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  overflow-wrap: anywhere;
+}
+
+.highlight__sub {
+  color: var(--muted);
+  font-size: 13px;
+  font-family: var(--mono);
+}
+
+.highlight.is-empty .highlight__value {
+  color: var(--dim);
+}
+
+.highlight.is-alert {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.highlight.is-alert .highlight__value {
+  color: var(--accent-ink);
+}
+
+.highlight.is-alert .highlight__label,
+.highlight.is-alert .highlight__sub {
+  color: rgba(21, 21, 21, 0.7);
+}

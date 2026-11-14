@@ -1,4 +1,4 @@
 /// <reference types="vite/client" />
 
-// I font self-hosted si importano solo per il loro CSS (nessun export).
+// Self-hosted fonts are imported only for their CSS (no export).
 declare module "@fontsource-variable/*";

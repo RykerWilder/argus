@@ -1,0 +1,42 @@
+.panel__side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.panel__tools {
+  display: flex;
+  gap: 6px;
+}
+
+.icon-btn--sm {
+  width: 32px;
+  height: 32px;
+}
+
+.icon-btn--sm svg {
+  width: 16px;
+  height: 16px;
+}
+
+a.icon-btn {
+  text-decoration: none;
+}
+
+/* tooltip of the buttons on the right (panels, history): towards the left,
+   so it does not leave the page edge */
+.panel__tools .icon-btn__tip,
+.history__remove .icon-btn__tip {
+  left: auto;
+  right: 0;
+  transform: translate(0, 4px);
+}
+
+.panel__tools .icon-btn:hover .icon-btn__tip,
+.panel__tools .icon-btn:focus-visible .icon-btn__tip,
+.panel__tools .icon-btn.is-done .icon-btn__tip,
+.history__remove:hover .icon-btn__tip,
+.history__remove:focus-visible .icon-btn__tip {
+  transform: translate(0, 0);
+}

@@ -11,15 +11,15 @@ import type {
   VtDnsRecord,
   VtFlagged,
 } from "../types";
-import Header, { Bracket, Footer } from "../components/Header";
-import LookupProgress from "../components/LookupProgress";
-import ActionBar from "../components/ActionBar";
-import PanelTools from "../components/PanelTools";
-import { sourceLink } from "../lib/panelLinks";
-import { recordSearch } from "../lib/history";
-import { panelText, textLines } from "../lib/panelText";
-import type { PanelTextSection } from "../lib/panelText";
-import Anatomy from "../components/Anatomy";
+import Header, { Bracket, Footer } from "../components/layout/Header";
+import LookupProgress from "../components/report/LookupProgress";
+import ActionBar from "../components/report/ActionBar";
+import PanelTools from "../components/report/PanelTools";
+import { sourceLink } from "../lib/report/panelLinks";
+import { recordSearch } from "../lib/search/history";
+import { panelText, textLines } from "../lib/report/panelText";
+import type { PanelTextSection } from "../lib/report/panelText";
+import Anatomy from "../components/report/Anatomy";
 import {
   Empty,
   FitHeading,
@@ -29,13 +29,13 @@ import {
   presentRows,
   useLookup,
   usePageTitle,
-} from "../components/ResultParts";
-import { buildDomainReport } from "../lib/domainReport";
-import { sourcesFor } from "../lib/lookup";
-import { classify, resultPath } from "../lib/target";
-import { formatDate } from "../lib/report";
+} from "../components/report/ResultParts";
+import { buildDomainReport } from "../lib/report/domainReport";
+import { sourcesFor } from "../lib/search/lookup";
+import { classify, resultPath } from "../lib/search/target";
+import { formatDate } from "../lib/report/ipReport";
 
-// Risultati per domini (/domain/:domain) e URL (/url?target=...).
+// Results for domains (/domain/:domain) and URLs (/url?target=...).
 export default function DomainResult({ kind }: { kind: "domain" | "url" }) {
   const { domain } = useParams();
   const [params] = useSearchParams();
@@ -224,7 +224,7 @@ function Report({ report, target }: { report: DomainReport; target: DomainTarget
   );
 }
 
-// Indirizzi IP del dominio, ognuno apre il report IP di Argus.
+// IP addresses of the domain, each opens Argus's IP report.
 function Resolves({ resolves }: { resolves: ResolvedIps }) {
   const ips = [...(resolves?.ipv4 || []), ...(resolves?.ipv6 || [])];
   if (!ips.length) return null;
@@ -305,7 +305,7 @@ function Flagged({ items }: { items: VtFlagged[] }) {
   );
 }
 
-// Record DNS nascosti all'inizio: il pulsante espande la scheda e li mostra.
+// DNS records hidden at first: the button expands the card and shows them.
 function DnsRecords({ records }: { records: VtDnsRecord[] }) {
   const [open, setOpen] = useState(false);
   const bodyRef = useRef<HTMLDivElement>(null);
@@ -316,8 +316,8 @@ function DnsRecords({ records }: { records: VtDnsRecord[] }) {
     }, {}),
   );
 
-  // `inert` toglie dal tab e dall'accessibilità il contenuto nascosto; si imposta
-  // sul nodo perché non tutte le versioni dei tipi di React lo conoscono
+  // `inert` removes the hidden content from the tab order and the accessibility tree; it is
+  // set on the node because not all versions of React's types know it
   useLayoutEffect(() => {
     bodyRef.current?.toggleAttribute("inert", !open);
   }, [open]);

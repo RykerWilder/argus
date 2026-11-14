@@ -1,0 +1,90 @@
+.tools-menu {
+  position: relative;
+}
+
+.tools-menu__button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  cursor: pointer;
+}
+
+.tools-menu__button svg {
+  transition: transform 160ms ease;
+}
+
+.tools-menu__button[aria-expanded="true"] svg {
+  transform: rotate(180deg);
+}
+
+.tools-menu__button.is-active {
+  color: var(--accent);
+}
+
+.tools-menu__list {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 10px);
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  width: 320px;
+  border: 1px solid var(--line);
+  background: var(--bg-raised);
+  font-family: var(--sans);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.tools-menu__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.tools-menu__item + .tools-menu__item {
+  border-top: 1px solid var(--line-soft);
+}
+
+.tools-menu__item > svg {
+  flex: none;
+  margin-top: 1px;
+  color: var(--accent);
+}
+
+.tools-menu__item > span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tools-menu__name {
+  font-family: var(--mono);
+  font-size: 14px;
+  letter-spacing: 0.04em;
+}
+
+.tools-menu__hint {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.tools-menu__item:hover,
+.tools-menu__item:focus-visible {
+  background: rgba(61, 255, 197, 0.08);
+  outline: none;
+}
+
+.tools-menu__item:hover .tools-menu__name,
+.tools-menu__item:focus-visible .tools-menu__name {
+  color: var(--accent);
+}

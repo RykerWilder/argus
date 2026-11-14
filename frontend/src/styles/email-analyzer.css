@@ -1,0 +1,607 @@
+.btn--compact {
+  min-height: 48px;
+  gap: 12px;
+  padding: 0 20px;
+  font-size: 13px;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.mail-tool {
+  width: min(960px, 100%);
+  margin: 0 auto;
+  padding-top: clamp(24px, 6vh, 64px);
+}
+
+.mail-tool__title {
+  margin: 0 0 10px;
+  font-weight: 300;
+  font-size: clamp(32px, 4vw, 52px);
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+}
+
+.mail-tool__lead {
+  max-width: 64ch;
+  margin: 0 0 28px;
+  font-size: 17px;
+}
+
+.mail-input {
+  position: relative;
+  border: 1px solid var(--line);
+  background: rgba(21, 21, 21, 0.9);
+  transition: border-color 140ms ease;
+}
+
+.mail-input:focus-within {
+  border-color: #4a4a47;
+}
+
+.mail-input.has-error {
+  border-color: rgba(255, 107, 79, 0.6);
+}
+
+.mail-input.is-dragging {
+  border-color: var(--accent);
+}
+
+.mail-input textarea {
+  display: block;
+  width: 100%;
+  height: 320px;
+  padding: 20px 22px;
+  border: 0;
+  background: transparent;
+  font-size: 13px;
+  line-height: 1.55;
+  resize: none;
+  /* long lines wrap: no horizontal scrollbar */
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.mail-input textarea:focus {
+  outline: none;
+}
+
+.mail-input textarea::placeholder {
+  color: var(--dim);
+}
+
+.mail-input__file {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 140px;
+  padding: 24px 22px;
+}
+
+.mail-input__file svg {
+  color: var(--accent);
+}
+
+.mail-input__file .mono:first-of-type {
+  font-size: 16px;
+  overflow-wrap: anywhere;
+}
+
+.mail-input__remove {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  margin-left: auto;
+  border: 1px solid var(--line);
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.mail-input__remove:hover {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.mail-input__drop {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: rgba(21, 21, 21, 0.92);
+  color: var(--accent);
+  font-family: var(--mono);
+  font-size: 15px;
+  letter-spacing: 0.04em;
+  pointer-events: none;
+}
+
+.mail-input__bar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border-top: 1px solid var(--line);
+}
+
+.mail-input__bar .btn--solid {
+  margin-left: auto;
+}
+
+.mail-input__or {
+  font-size: 14px;
+}
+
+.mail-help {
+  margin-top: 28px;
+  border-top: 1px solid var(--line);
+}
+
+.mail-help summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 0;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  list-style: none;
+}
+
+.mail-help summary::-webkit-details-marker {
+  display: none;
+}
+
+.mail-help[open] summary svg {
+  transform: rotate(180deg);
+}
+
+.mail-help summary:hover {
+  color: var(--text);
+}
+
+.mail-help dl {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 18px 32px;
+  margin: 0 0 8px;
+}
+
+.mail-help dt {
+  margin-bottom: 4px;
+  font-size: 15px;
+}
+
+.mail-help dd {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.mail-help em {
+  color: var(--text);
+  font-style: normal;
+}
+
+/* report */
+
+.mail-subject {
+  margin: 0;
+  font-weight: 400;
+  font-size: clamp(26px, 3.2vw, 44px);
+  line-height: 1.12;
+  letter-spacing: -0.03em;
+  overflow-wrap: anywhere;
+}
+
+.mail-from {
+  margin: 10px 0 0;
+  font-size: 15px;
+  overflow-wrap: anywhere;
+}
+
+.mail-from .mono {
+  color: var(--text);
+}
+
+.verdict__basis {
+  margin: 10px 0 0;
+  font-size: 13px;
+}
+
+.mail-note {
+  margin: 0 0 20px;
+}
+
+.auth-list,
+.att-list,
+.route-legend {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.auth-row {
+  display: grid;
+  grid-template-columns: 130px 104px minmax(0, 1fr);
+  align-items: start;
+  gap: 14px;
+  padding: 12px 0;
+  border-top: 1px solid var(--line-soft);
+}
+
+.auth-row:first-child {
+  border-top: 0;
+}
+
+.auth-row__name {
+  font-size: 15px;
+  cursor: help;
+}
+
+.auth-badge {
+  padding: 3px 0;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.auth-badge.is-pass {
+  border-color: var(--accent);
+  background: rgba(61, 255, 197, 0.08);
+  color: var(--accent);
+}
+
+.auth-badge.is-fail {
+  border-color: var(--danger);
+  background: rgba(255, 107, 79, 0.08);
+  color: var(--danger);
+}
+
+.auth-badge.is-weak {
+  border-color: var(--warn);
+  color: var(--warn);
+}
+
+.auth-row__detail {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.auth-row__detail .mono {
+  font-size: 13px;
+}
+
+/* route: map next to Authentication, as tall as the panel */
+
+.mail-grid {
+  align-items: stretch;
+}
+
+.mail-route {
+  display: flex;
+  flex-direction: column;
+}
+
+.mail-route__map {
+  flex: 1 1 auto;
+  min-height: 340px;
+}
+
+.mail-route__map .worldmap--interactive {
+  min-height: 340px;
+}
+
+.worldmap__arc {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1.4;
+  stroke-dasharray: 5 4;
+  opacity: 0.85;
+  animation: arc-flow 1.6s linear infinite;
+}
+
+@keyframes arc-flow {
+  to {
+    stroke-dashoffset: -18;
+  }
+}
+
+.worldmap__stop-dot {
+  fill: var(--bg);
+  stroke: var(--accent);
+  stroke-width: 1.4;
+  vector-effect: non-scaling-stroke;
+}
+
+.worldmap__stop.is-origin .worldmap__stop-dot {
+  fill: var(--accent);
+}
+
+.worldmap__stop text {
+  fill: var(--accent);
+  font-family: var(--mono);
+  font-size: calc(11px / var(--k, 1));
+  font-weight: 500;
+  pointer-events: none;
+}
+
+.worldmap__stop.is-origin text {
+  fill: var(--accent-ink);
+}
+
+.route-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin-top: 14px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.route-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.route-legend__n {
+  display: inline-grid;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 4px;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  font-size: 11px;
+}
+
+.route-legend li:first-child .route-legend__n {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+a.highlight__link {
+  text-decoration: none;
+}
+
+a.highlight__link:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+/* attachments */
+
+.att {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px 20px;
+  padding: 14px 0;
+  border-top: 1px solid var(--line-soft);
+}
+
+.att:first-child {
+  border-top: 0;
+}
+
+.att__name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  font-size: 16px;
+  overflow-wrap: anywhere;
+}
+
+.att__name svg {
+  color: var(--accent);
+}
+
+.att__name .mono {
+  font-size: 12px;
+}
+
+.att__tools {
+  display: flex;
+  grid-row: 1 / span 2;
+  grid-column: 2;
+  gap: 8px;
+}
+
+.att__hashes {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+}
+
+.att__hashes div {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  gap: 10px;
+}
+
+.att__hashes dt {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.att__hashes dd {
+  margin: 0;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+/* all headers */
+
+.mail-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--accent);
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.mail-toggle:hover {
+  border-color: var(--accent);
+}
+
+.mail-toggle[aria-expanded="true"] svg {
+  transform: rotate(180deg);
+}
+
+.mail-headers__search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 420px;
+  margin-bottom: 12px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  color: var(--muted);
+}
+
+.mail-headers__search input {
+  flex: 1;
+  height: 40px;
+  border: 0;
+  background: none;
+  font-size: 14px;
+}
+
+.mail-headers__search input:focus {
+  outline: none;
+}
+
+.mail-headers__search:focus-within {
+  border-color: #4a4a47;
+}
+
+.header-table {
+  margin: 0;
+}
+
+.header-table__row {
+  display: grid;
+  grid-template-columns: minmax(160px, 260px) minmax(0, 1fr);
+  gap: 16px;
+  padding: 9px 0;
+  border-top: 1px solid var(--line-soft);
+}
+
+.header-table__row dt {
+  position: relative;
+  color: var(--text);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.header-table__row dt[title] {
+  cursor: help;
+  text-decoration: underline dotted var(--dim);
+  text-underline-offset: 4px;
+}
+
+/* the explanation is in the title (hover) and here for screen readers */
+.header-table__help {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.header-table__row dd {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12.5px;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+@media (max-width: 960px) {
+  .mail-route__map {
+    min-height: 280px;
+  }
+
+  .mail-route__map .worldmap--interactive {
+    min-height: 280px;
+  }
+}
+
+@media (max-width: 640px) {
+  .reports-scroll--list.is-scrollable {
+    max-height: 60vh;
+  }
+
+  .mail-input textarea {
+    height: 240px;
+    padding: 16px;
+  }
+
+  .mail-input__bar {
+    flex-wrap: wrap;
+  }
+
+  .mail-input__or {
+    display: none;
+  }
+
+  .mail-input__bar .btn {
+    flex: 1;
+  }
+
+  .auth-row {
+    grid-template-columns: minmax(0, 1fr) 96px;
+  }
+
+  .auth-row__detail {
+    grid-column: 1 / -1;
+  }
+
+  .header-table__row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2px;
+  }
+
+  .tools-menu__list {
+    right: auto;
+    left: 0;
+    width: min(320px, calc(100vw - 32px));
+  }
+
+  .att {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .att__tools {
+    grid-row: auto;
+    grid-column: auto;
+  }
+}

@@ -1,0 +1,120 @@
+# Argus behind Authelia.
+#
+# This file is a template: when the container starts, the official nginx image replaces
+# ${ARGUS_DOMAIN} and ${ARGUS_PROXY_SECRET} with the environment values
+# (NGINX_ENVSUBST_FILTER=^ARGUS_ leaves nginx's own variables, like $host, alone).
+#
+# Two sites answer on the same HTTPS port:
+#   auth.<domain>   the sign-in portal (Authelia)
+#   <domain>        Argus: every request, pages and /api, goes through Authelia first
+# Any other name (or access without a name) is refused during the TLS handshake.
+
+# Container health check: listens inside the container only, not exposed.
+server {
+    listen 127.0.0.1:8081;
+    server_name localhost;
+    access_log off;
+
+    location = /healthz {
+        default_type text/plain;
+        return 200 "ok\n";
+    }
+}
+
+server {
+    listen 443 ssl default_server;
+    server_name _;
+    ssl_reject_handshake on;
+}
+
+# Sign-in portal
+server {
+    listen 443 ssl;
+    http2 on;
+    server_name auth.${ARGUS_DOMAIN};
+    server_tokens off;
+
+    include /etc/nginx/snippets/tls.conf;
+
+    # No security-headers.conf here: Authelia sets its own (CSP included).
+    add_header Strict-Transport-Security "max-age=15552000" always;
+
+    location / {
+        include /etc/nginx/snippets/authelia-proxy.conf;
+        proxy_pass http://authelia:9091;
+    }
+}
+
+# Argus
+server {
+    listen 443 ssl;
+    http2 on;
+    server_name ${ARGUS_DOMAIN};
+    server_tokens off;
+    root /usr/share/nginx/html;
+    index index.html;
+
+    include /etc/nginx/snippets/tls.conf;
+    include /etc/nginx/snippets/security-headers.conf;
+
+    # Secret shared with the backend: proof the request came through here (see proxy-api.conf).
+    set $argus_proxy_secret "${ARGUS_PROXY_SECRET}";
+
+    # Subrequest nginx uses to ask Authelia whether the session is valid.
+    include /etc/nginx/snippets/authelia-location.conf;
+
+    # /api calls with an expired session get a JSON 401 (the frontend recognizes it and
+    # goes back to sign-in); pages are redirected instead.
+    location @api_login_required {
+        default_type application/json;
+        return 401 '{"detail":"Your session has expired. Sign in again.","code":"login_required"}';
+    }
+
+    # Reverse proxy to the FastAPI backend
+    location /api/ {
+        include /etc/nginx/snippets/proxy-api.conf;
+    }
+
+    # Email header analyzer: .eml / .msg files up to 25 MB (about 34 MB in base64).
+    # The request body is neither stored nor written to the logs.
+    location /api/email/ {
+        client_max_body_size 40m;
+        client_body_buffer_size 40m;
+        proxy_request_buffering on;
+        include /etc/nginx/snippets/proxy-api.conf;
+    }
+
+    # Files with a hash in their name never change: cache for a year
+    location /assets/ {
+        include /etc/nginx/snippets/authelia-authrequest.conf;
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+        include /etc/nginx/snippets/security-headers.conf;
+    }
+
+    location /geo/ {
+        include /etc/nginx/snippets/authelia-authrequest.conf;
+        expires 30d;
+        add_header Cache-Control "public";
+        include /etc/nginx/snippets/security-headers.conf;
+    }
+
+    # index.html must not be cached: after an update it has to point to the new files in
+    # /assets/, otherwise the browser looks for chunks that no longer exist.
+    location = /index.html {
+        include /etc/nginx/snippets/authelia-authrequest.conf;
+        add_header Cache-Control "no-cache";
+        include /etc/nginx/snippets/security-headers.conf;
+    }
+
+    # SPA fallback for React Router (/ip/:ip)
+    location / {
+        include /etc/nginx/snippets/authelia-authrequest.conf;
+        try_files $uri $uri/ /index.html;
+    }
+
+    gzip on;
+    gzip_vary on;
+    gzip_min_length 1024;
+    gzip_types text/plain text/css application/javascript application/json image/svg+xml;
+}

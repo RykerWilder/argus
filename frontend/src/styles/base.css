@@ -1,0 +1,100 @@
+/* Argus palette and typography: warm black, near-pure white, a single mint accent (#3dffc5),
+   Geist + Geist Mono. */
+
+:root {
+  --bg: #151515;
+  --bg-raised: #1b1b1b;
+  --line: #2b2b2b;
+  --line-soft: #202020;
+  --text: #f3f3f0;
+  --muted: #8f8f8a;
+  --dim: #5e5e5a;
+  --accent: #3dffc5;
+  --accent-ink: #151515;
+  --warn: #f6b54b;
+  --danger: #ff6b4f;
+
+  --sans: "Geist Variable", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --mono: "Geist Mono Variable", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  --gutter: clamp(16px, 2.6vw, 40px);
+  --grid: 72px;
+
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-color: var(--bg);
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.028) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.028) 1px, transparent 1px);
+  background-size: var(--grid) var(--grid);
+  background-position: calc(var(--gutter) - 1px) 0;
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: inherit;
+}
+
+button,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.mono {
+  font-family: var(--mono);
+  font-feature-settings: "zero" 1;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.page > main {
+  flex: 1;
+  padding: 0 var(--gutter) 64px;
+}

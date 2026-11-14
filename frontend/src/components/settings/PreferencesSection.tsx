@@ -1,10 +1,12 @@
+import { useState } from "react";
 import type { Source } from "../../types";
-import Toggle from "../Toggle";
-import { DOMAIN_SOURCES, IP_SOURCES } from "../../lib/lookup";
-import { API_KEY_SERVICES, isServiceEnabled, setServiceEnabled } from "../../lib/settings";
-import { useSettingsVersion } from "../../lib/useSettings";
+import Toggle from "../ui/Toggle";
+import { ApiError } from "../../lib/api";
+import { DOMAIN_SOURCES, IP_SOURCES } from "../../lib/search/lookup";
+import { API_KEY_SERVICES, isServiceEnabled, setServiceEnabled } from "../../lib/user/settings";
+import { useSettingsVersion } from "../../lib/user/useSettings";
 
-// Quali servizi Argus può interrogare. Un servizio spento non viene chiamato.
+// Which services Argus may query. A service that is off is not called.
 const GROUPS: { id: string; title: string; used: string; sources: Source[] }[] = [
   { id: "ip", title: "IP addresses", used: "searches for IP addresses", sources: IP_SOURCES },
   { id: "domain", title: "Domains and URLs", used: "searches for domains and URLs", sources: DOMAIN_SOURCES },
@@ -18,12 +20,26 @@ const needsKey = (id: string) => API_KEY_SERVICES.find((s) => s.id === id)?.requ
 
 export default function PreferencesSection() {
   useSettingsVersion();
+  const [error, setError] = useState<string | null>(null);
+
+  function toggle(id: string, on: boolean) {
+    setError(null);
+    setServiceEnabled(id, on).catch((err: unknown) => {
+      setError(err instanceof ApiError ? err.message : "The change could not be saved.");
+    });
+  }
 
   return (
     <>
       <p className="settings__lead muted">
         Choose which services Argus queries. A service that is turned off is never called, and its panel does not appear in the report.
+        Your choices are saved in your account, so they follow you to any browser. The search history stays in this browser.
       </p>
+      {error && (
+        <p className="settings__warning" role="alert">
+          Not saved: {error}
+        </p>
+      )}
 
       {GROUPS.map((group) => {
         const allOff = group.sources.every((s) => !isServiceEnabled(s.id));
@@ -41,7 +57,7 @@ export default function PreferencesSection() {
                   </div>
                   <Toggle
                     checked={isServiceEnabled(s.id)}
-                    onChange={(on) => setServiceEnabled(s.id, on)}
+                    onChange={(on) => toggle(s.id, on)}
                     label={`Query ${s.name}`}
                   />
                 </li>

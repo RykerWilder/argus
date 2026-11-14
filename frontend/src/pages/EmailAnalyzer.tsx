@@ -11,26 +11,26 @@ import type {
   RouteStop,
   SpamResult,
 } from "../types";
-import Header, { Bracket, Footer } from "../components/Header";
-import IconButton from "../components/IconButton";
-import WorldMap from "../components/WorldMap";
+import Header, { Bracket, Footer } from "../components/layout/Header";
+import IconButton from "../components/ui/IconButton";
+import WorldMap from "../components/report/WorldMap";
 import { postJson } from "../lib/api";
 import { copyText } from "../lib/clipboard";
-import { download } from "../lib/exporters";
-import { classify, resultPath } from "../lib/target";
-import { countryName } from "../lib/countries";
-import { AUTH_EXPLAIN, explainHeader } from "../lib/emailHeaders";
-import { duration, emailFileName, emailSummaryText, emailToJSON, emailToMarkdown } from "../lib/emailExport";
-import { isServiceEnabled } from "../lib/settings";
+import { download } from "../lib/report/exporters";
+import { classify, resultPath } from "../lib/search/target";
+import { countryName } from "../lib/geo/countries";
+import { AUTH_EXPLAIN, explainHeader } from "../lib/email/headers";
+import { duration, emailFileName, emailSummaryText, emailToJSON, emailToMarkdown } from "../lib/email/export";
+import { isServiceEnabled } from "../lib/user/settings";
 
 // Email header analyzer (/tools/email-headers).
-// L'email (header incollati, .eml o .msg) va al backend solo per l'analisi e
-// non viene salvata da nessuna parte: né sul server, né nella cronologia, né
-// nello storage del browser. L'ultimo report resta solo in memoria finché la
-// scheda è aperta, così tornando indietro da un report IP lo si ritrova.
+// The email (pasted headers, .eml or .msg) goes to the backend only for analysis and is
+// not saved anywhere: not on the server, not in the history, not in the browser's
+// storage. The last report stays in memory only while the tab is open, so going back
+// from an IP report finds it again.
 
 const MAX_FILE = 25 * 1024 * 1024;
-// nginx aspetta il backend fino a 60 secondi
+// nginx waits for the backend up to 60 seconds
 const ANALYZE_TIMEOUT = 65_000;
 let lastReport: EmailReport | null = null;
 
@@ -95,7 +95,7 @@ export default function EmailAnalyzer() {
     setError(null);
     try {
       const input = file ? { filename: file.name, content: await readAsBase64(file) } : { text };
-      // le posizioni dei server vengono da ip-api.com: se è disattivato non si interroga
+      // the servers' positions come from ip-api.com: if it is turned off it is not queried
       const body = { ...input, geolocate: isServiceEnabled("iptracker") };
       const data = await postJson<EmailReport>("/api/email/analyze", body, { timeout: ANALYZE_TIMEOUT });
       lastReport = data;
@@ -257,15 +257,13 @@ export default function EmailAnalyzer() {
   );
 }
 
-// ── Report ─────────────────────────────────────────────────
-
 interface MailHighlight {
   key: string;
   label: string;
   value: string | null | undefined;
   sub?: string | null;
   alert?: boolean;
-  /** Percorso interno a cui porta il valore, se è un indicatore analizzabile. */
+  /** Internal path the value leads to, if it is an analyzable indicator. */
   to?: string | null;
 }
 

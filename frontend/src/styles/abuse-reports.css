@@ -1,0 +1,315 @@
+.remarks summary {
+  margin: 0 0 8px;
+  font-weight: 400;
+  font-size: 15px;
+  color: var(--muted);
+}
+
+.categories ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.categories li {
+  display: grid;
+  grid-template-columns: minmax(110px, 1.6fr) minmax(24px, 1fr) 28px 40px;
+  align-items: center;
+  gap: 14px;
+  padding: 6px 0;
+  font-size: 15px;
+  transition: opacity 0.15s;
+}
+
+/* The list columns are shared by the rows (names on one line, bars aligned) */
+@supports (grid-template-columns: subgrid) {
+  .categories ul {
+    display: grid;
+    grid-template-columns: max-content minmax(24px, 1fr) auto auto;
+    column-gap: 14px;
+  }
+
+  .categories li {
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
+  }
+}
+
+.categories li .mono {
+  text-align: right;
+  font-size: 14px;
+}
+
+.categories__bar {
+  height: 6px;
+  background: var(--line-soft);
+}
+
+.categories__bar span {
+  display: block;
+  height: 100%;
+  background: var(--text);
+}
+
+.categories li .categories__share {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* Slice colors: only the Argus palette. A ramp of the accent mint green, from lightest
+   (the most reported category) to darkest, and the "muted" gray for "Other".
+   The ramp has a single hue and the slices are sorted by count: lightness gives the order.
+   Validated on the dark background (distinct lightness steps, contrast >= 3:1 against it).
+   Yellow and red are not used: in Argus they mean warnings and errors. */
+.categories {
+  --pie-1: var(--accent);
+  --pie-2: #16d9a6;
+  --pie-3: #0cb589;
+  --pie-4: #039271;
+  --pie-5: #01775a;
+  --pie-other: var(--muted);
+}
+
+.categories__body {
+  display: grid;
+  grid-template-columns: 148px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px 28px;
+}
+
+.categories__pie {
+  position: relative;
+  width: 148px;
+  height: 148px;
+}
+
+.categories__pie svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* 2px of background between the slices: the border separates them, not a colored outline */
+.pie__slice {
+  stroke: var(--bg);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  outline: none;
+  transform-origin: 80px 80px;
+  transition:
+    opacity 0.15s,
+    transform 0.15s;
+}
+
+.pie__slice.is-active {
+  transform: scale(1.04);
+}
+
+.pie__slice.is-dim,
+.categories li.is-dim {
+  opacity: 0.45;
+}
+
+.pie__tip {
+  position: absolute;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  font-size: 13px;
+  line-height: 1.35;
+  pointer-events: none;
+  white-space: nowrap;
+  transform: translate(-50%, calc(-100% - 14px));
+}
+
+.pie__tip strong {
+  font-weight: 500;
+  font-size: 15px;
+}
+
+.pie__tip span {
+  color: var(--muted);
+}
+
+.categories__name {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.categories__swatch {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+
+.categories__note {
+  margin: 12px 0 0;
+  font-size: 13px;
+}
+
+@media (max-width: 640px) {
+  .categories__body {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: start;
+  }
+
+  .categories ul,
+  .categories li {
+    column-gap: 10px;
+  }
+
+  .categories__name {
+    gap: 8px;
+  }
+}
+
+.remarks {
+  margin-top: 18px;
+}
+
+.remarks summary {
+  cursor: pointer;
+}
+
+.remarks pre {
+  margin: 8px 0 0;
+  padding: 12px;
+  border: 1px solid var(--line-soft);
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 12px;
+  white-space: pre-wrap;
+}
+
+.reports {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* AbuseIPDB reports: fixed-height box that scrolls inside */
+.reports__count {
+  margin: 0 0 10px;
+  font-size: 13px;
+}
+
+.reports-scroll.is-scrollable {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 14px;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  scrollbar-width: thin;
+  scrollbar-color: #3d3d3b transparent;
+  /* fade at the bottom: shows there is more to scroll */
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 28px), transparent);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 28px), transparent);
+}
+
+.reports-scroll--list.is-scrollable {
+  max-height: 440px;
+}
+
+.reports-scroll--day.is-scrollable {
+  max-height: 300px;
+}
+
+.reports-scroll.is-scrollable .reports li:last-child {
+  padding-bottom: 28px;
+}
+
+.reports-scroll:focus-visible {
+  outline-offset: 2px;
+}
+
+.reports-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.reports-scroll::-webkit-scrollbar-thumb {
+  background: #3d3d3b;
+}
+
+.reports-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--muted);
+}
+
+.reports li {
+  display: grid;
+  grid-template-columns: 170px minmax(0, 1fr);
+  column-gap: 24px;
+  padding: 14px 0;
+  border-top: 1px solid var(--line-soft);
+}
+
+.reports li:first-child {
+  border-top: 0;
+}
+
+.reports__meta {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.reports__body p {
+  margin: 0;
+}
+
+.reports__who {
+  font-size: 15px;
+}
+
+.reports__cats {
+  margin-top: 2px !important;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.reports__comment {
+  margin-top: 8px !important;
+  padding: 10px 12px;
+  border-left: 2px solid var(--line);
+  background: rgba(255, 255, 255, 0.02);
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+/* Panels with a separate column (AbuseIPDB timeline, Shodan CVEs):
+   data on the left, chart or list on the right */
+.source-panel__split--aside {
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  align-items: start;
+}
+
+.source-panel__split > .vulns {
+  margin-top: 0;
+}
+
+.vulns__note {
+  margin: 0 0 12px;
+  font-size: 14px;
+}
+
+.vulns__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 14px;
+}
+
+.vulns .remarks .vulns__list {
+  margin-top: 8px;
+}

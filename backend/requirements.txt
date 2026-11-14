@@ -1,3 +1,4 @@
+cryptography>=46,<51
 dnspython==2.7.0
 fastapi==0.136.3
 httpx==0.28.1

@@ -3,7 +3,7 @@ export async function copyText(text: string): Promise<boolean> {
     await navigator.clipboard.writeText(text);
     return true;
   } catch {
-    // fallback per contesti non sicuri (http senza localhost)
+    // fallback for insecure contexts (http without localhost)
     const ta = document.createElement("textarea");
     ta.value = text;
     ta.setAttribute("readonly", "");

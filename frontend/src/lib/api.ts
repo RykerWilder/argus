@@ -1,21 +1,21 @@
-// Unico punto da cui il frontend fa richieste HTTP: JSON in entrata e in uscita,
-// timeout, annullamento e messaggi d'errore leggibili. Chi chiama non ripete
-// fetch / res.ok / res.json() e ha a che fare con un solo tipo di errore.
+// The single place the frontend makes HTTP requests from: JSON in and out, timeouts,
+// cancellation and readable error messages. Callers do not repeat fetch / res.ok /
+// res.json() and deal with a single error type.
 
 const DEFAULT_TIMEOUT = 30_000;
 
-/** Opzioni di `request`. */
+/** Options of `request`. */
 export interface RequestOptions {
   method?: string;
-  /** Oggetto da inviare come JSON. */
+  /** Object to send as JSON. */
   body?: unknown;
   headers?: Record<string, string>;
   signal?: AbortSignal;
-  /** Millisecondi prima di rinunciare. */
+  /** Milliseconds before giving up. */
   timeout?: number;
 }
 
-/** Errore di una richiesta. `status` è il codice HTTP, assente se il server non ha risposto. */
+/** Error of a request. `status` is the HTTP code, absent if the server did not answer. */
 export class ApiError extends Error {
   readonly status: number | undefined;
 
@@ -26,29 +26,55 @@ export class ApiError extends Error {
   }
 }
 
-/** Vero per l'errore di una richiesta annullata (AbortController), che non è un ApiError. */
+/** When nginx no longer recognizes the Authelia session it answers 401 with this `code` (see nginx/default.conf.template). */
+const LOGIN_REQUIRED = "login_required";
+
+/** When the reload towards sign-in was last done: avoids a loop if something goes wrong. */
+const LOGIN_RELOAD_KEY = "argus:login-reload";
+
+function isLoginRequired(status: number, data: unknown): boolean {
+  return status === 401 && (data as { code?: unknown } | null)?.code === LOGIN_REQUIRED;
+}
+
+/**
+ * The session expired: reloading the page makes nginx redirect to the Authelia sign-in,
+ * which returns here after login. A 401 from an external service (invalid API key) does
+ * not come through here: it has no nginx `code`.
+ */
+function reloadToLogin(): void {
+  try {
+    const last = Number(sessionStorage.getItem(LOGIN_RELOAD_KEY) || 0);
+    if (Date.now() - last < 15_000) return;  // just tried: no repeated reloads
+    sessionStorage.setItem(LOGIN_RELOAD_KEY, String(Date.now()));
+  } catch {
+    // sessionStorage not available: reload anyway
+  }
+  window.location.reload();
+}
+
+/** True for the error of a cancelled request (AbortController), which is not an ApiError. */
 export function isAbortError(err: unknown): boolean {
   return typeof err === "object" && err !== null && "name" in err && err.name === "AbortError";
 }
 
 function messageFor(status: number, data: unknown): string {
-  // FastAPI mette il motivo in `detail`; per gli errori di validazione è una lista
+  // FastAPI puts the reason in `detail`; for validation errors it is a list
   const detail = (data as { detail?: unknown } | null)?.detail;
   if (typeof detail === "string") return detail;
-  // nginx risponde 413 (con una pagina HTML) quando il corpo supera il limite
+  // nginx answers 413 (with an HTML page) when the body exceeds the limit
   if (status === 413) return "The upload is too large.";
   return `The request failed (HTTP ${status}).`;
 }
 
 /**
- * Richiesta con risposta JSON.
+ * Request with a JSON response.
  *
- * - `body`: oggetto da inviare come JSON (se presente, il metodo di solito è POST).
- * - `signal`: per annullare dall'esterno. In quel caso l'errore è un AbortError
- *   del browser, non un ApiError, così chi annulla può riconoscerlo e ignorarlo.
- * - `timeout`: millisecondi prima di rinunciare (ApiError "timed out").
+ * - `body`: object to send as JSON (if present, the method is usually POST).
+ * - `signal`: to cancel from outside. In that case the error is the browser's AbortError,
+ *   not an ApiError, so the caller can recognize it and ignore it.
+ * - `timeout`: milliseconds before giving up (ApiError "timed out").
  *
- * Restituisce il JSON della risposta (di tipo `T`, non validato) oppure lancia ApiError.
+ * Returns the response JSON (of type `T`, not validated) or throws ApiError.
  */
 export async function request<T = unknown>(
   url: string,
@@ -75,12 +101,16 @@ export async function request<T = unknown>(
       });
     } catch (err) {
       if (timedOut) throw new ApiError("The request timed out.");
-      if (isAbortError(err)) throw err; // annullata da chi ha chiamato
+      if (isAbortError(err)) throw err;  // cancelled by the caller
       throw new ApiError("The backend could not be reached.");
     }
 
     const data: unknown = await res.json().catch(() => null);
     if (timedOut) throw new ApiError("The request timed out.");
+    if (isLoginRequired(res.status, data)) {
+      reloadToLogin();
+      throw new ApiError("Your session has expired. Signing you in again…", 401);
+    }
     if (!res.ok) throw new ApiError(messageFor(res.status, data), res.status);
     if (data === null) throw new ApiError("The server sent an unreadable response.", res.status);
     return data as T;
@@ -90,6 +120,10 @@ export async function request<T = unknown>(
   }
 }
 
-/** POST con corpo JSON. */
+/** PUT with a JSON body. */
+export const putJson = <T = unknown>(url: string, body: unknown, options?: Omit<RequestOptions, "method" | "body">) =>
+  request<T>(url, { ...options, method: "PUT", body });
+
+/** POST with a JSON body. */
 export const postJson = <T = unknown>(url: string, body: unknown, options?: Omit<RequestOptions, "method" | "body">) =>
   request<T>(url, { ...options, method: "POST", body });

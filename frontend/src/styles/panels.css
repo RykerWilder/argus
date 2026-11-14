@@ -1,0 +1,203 @@
+/* One panel per source */
+.source-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  margin-top: 40px;
+}
+
+.panel--span {
+  grid-column: 1 / -1;
+}
+
+/* IP result: map and ProxyCheck.io on the left, ip-api.com on the right,
+   AbuseIPDB and Shodan below at full width */
+.source-grid--ip {
+  grid-template-areas:
+    "map iptracker"
+    "proxycheck iptracker"
+    "abuseipdb abuseipdb"
+    "shodan shodan";
+  grid-template-rows: minmax(300px, 1fr) auto auto auto;
+}
+
+.source-grid--ip.source-grid--pc-right {
+  grid-template-areas:
+    "map proxycheck"
+    "iptracker proxycheck"
+    "abuseipdb abuseipdb"
+    "shodan shodan";
+}
+
+.source-grid--ip > .result-map {
+  grid-area: map;
+}
+
+.source-grid--ip > .source-panel--iptracker {
+  grid-area: iptracker;
+}
+
+.source-grid--ip > .source-panel--proxycheck {
+  grid-area: proxycheck;
+}
+
+.source-grid--ip > .source-panel--abuseipdb {
+  grid-area: abuseipdb;
+}
+
+.source-grid--ip > .source-panel--shodan {
+  grid-area: shodan;
+}
+
+.source-panel__split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 48px;
+}
+
+.panel__head > div p {
+  margin: 2px 0 0;
+}
+
+.panel__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.panel__status.is-error {
+  color: var(--danger);
+}
+
+.panel__error {
+  margin: 0;
+  padding: 12px 14px;
+  border-left: 2px solid var(--danger);
+  background: rgba(255, 107, 79, 0.06);
+  font-size: 15px;
+}
+
+.panel__warning {
+  margin: 0 0 12px;
+  padding: 10px 14px;
+  border-left: 2px solid var(--warn);
+  background: rgba(246, 181, 75, 0.06);
+  font-size: 14px;
+}
+
+.subsection {
+  margin-top: 26px;
+}
+
+.subsection h3 {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 0 8px;
+  font-weight: 400;
+  font-size: 15px;
+  color: var(--muted);
+}
+
+.panel {
+  border-top: 0;
+  border-left: 0;
+}
+
+.panel {
+  padding: 26px 28px 30px;
+  border: 1px solid var(--line);
+  background: rgba(21, 21, 21, 0.85);
+}
+
+.panel__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 4px 16px;
+  margin-bottom: 14px;
+}
+
+.panel__head h2 {
+  margin: 0;
+  font-weight: 400;
+  font-size: 26px;
+  letter-spacing: -0.025em;
+}
+
+.panel__head p {
+  margin: 0;
+  font-size: 14px;
+}
+
+.panel__empty {
+  margin: 0;
+  font-size: 15px;
+}
+
+.rows {
+  margin: 0;
+}
+
+.rows__item {
+  display: grid;
+  grid-template-columns: minmax(130px, 38%) 1fr;
+  gap: 16px;
+  padding: 11px 0;
+  border-top: 1px solid var(--line-soft);
+  font-size: 15px;
+}
+
+.rows__item:first-child {
+  border-top: 0;
+}
+
+.rows dt {
+  color: var(--muted);
+}
+
+.rows dd {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  white-space: pre-line;
+}
+
+.rows dd .mono {
+  font-size: 14px;
+}
+
+.rows__item.is-highlight dt {
+  color: var(--text);
+}
+
+.rows__item.is-highlight dd,
+.rows__item.is-highlight dd .mono {
+  color: var(--accent);
+}
+
+.rows__alt {
+  color: var(--warn) !important;
+  font-size: 12px;
+  font-family: var(--mono);
+}
+
+.rows__alt .mono {
+  font-size: 13px !important;
+}
+
+.rows--cols {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 40px;
+}
+
+.rows--cols .rows__item:nth-child(2) {
+  border-top: 0;
+}

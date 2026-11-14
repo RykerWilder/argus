@@ -1,0 +1,118 @@
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 22px var(--gutter);
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--text);
+  text-decoration: none;
+  font-size: 24px;
+  letter-spacing: -0.03em;
+}
+
+.logo__mark {
+  color: var(--muted);
+}
+
+.site-header__nav {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  font-family: var(--mono);
+  font-size: 14px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.nav-link {
+  text-decoration: none;
+  color: var(--text);
+}
+
+.nav-link:hover {
+  color: var(--accent);
+}
+
+/* Link between square brackets, the signature look of the header */
+.bracket {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7em;
+  padding: 4px 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font-family: var(--mono);
+  font-size: 14px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.bracket .mono {
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.bracket__label {
+  transition: color 120ms ease;
+}
+
+.bracket:hover .bracket__label {
+  color: var(--text);
+}
+
+.bracket:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* Button filled with the accent color, like "Get a demo" */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  min-height: 64px;
+  padding: 0 26px;
+  border: 1px solid transparent;
+  font-family: var(--mono);
+  font-size: 15px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn--solid {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.btn--solid:hover {
+  background: #73ffd5;
+}
+
+.btn--ghost {
+  background: transparent;
+  border-color: var(--line);
+  color: var(--text);
+}
+
+.btn--ghost:hover {
+  border-color: var(--muted);
+}
+
+.btn__square {
+  width: 10px;
+  height: 10px;
+  background: currentColor;
+}

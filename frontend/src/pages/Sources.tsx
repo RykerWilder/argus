@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import Header, { Bracket, Footer } from "../components/Header";
+import Header, { Bracket, Footer } from "../components/layout/Header";
 
 interface DataSource {
   name: string;

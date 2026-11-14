@@ -1,21 +1,21 @@
 import { useEffect, useMemo, useState } from "react";
 import { ChartSpline, List } from "lucide-react";
-import IconButton from "../components/IconButton";
+import IconButton from "../components/ui/IconButton";
 import { Link, useParams } from "react-router-dom";
 import type { IpReport, IpReportPanel, IpTarget, ProxyOperator, SourceId } from "../types";
-import Header, { Bracket, Footer } from "../components/Header";
-import LookupProgress from "../components/LookupProgress";
-import WorldMap from "../components/WorldMap";
-import ReportTimeline from "../components/ReportTimeline";
-import CategoryPie from "../components/CategoryPie";
-import ActionBar from "../components/ActionBar";
-import PanelTools from "../components/PanelTools";
-import { fmtShare, legendFor, pieSlices } from "../lib/categoryPie";
-import { sourceLink } from "../lib/panelLinks";
-import { recordSearch } from "../lib/history";
-import { panelText, textLines } from "../lib/panelText";
-import type { PanelTextSection } from "../lib/panelText";
-import { isValidIp, normalizeIp } from "../lib/ip";
+import Header, { Bracket, Footer } from "../components/layout/Header";
+import LookupProgress from "../components/report/LookupProgress";
+import WorldMap from "../components/report/WorldMap";
+import ReportTimeline from "../components/report/ReportTimeline";
+import CategoryPie from "../components/report/CategoryPie";
+import ActionBar from "../components/report/ActionBar";
+import PanelTools from "../components/report/PanelTools";
+import { fmtShare, legendFor, pieSlices } from "../lib/report/categoryPie";
+import { sourceLink } from "../lib/report/panelLinks";
+import { recordSearch } from "../lib/search/history";
+import { panelText, textLines } from "../lib/report/panelText";
+import type { PanelTextSection } from "../lib/report/panelText";
+import { isValidIp, normalizeIp } from "../lib/search/ip";
 import {
   Empty,
   FitHeading,
@@ -25,16 +25,16 @@ import {
   presentRows,
   useLookup,
   usePageTitle,
-} from "../components/ResultParts";
-import { buildReport } from "../lib/report";
-import { sourcesFor } from "../lib/lookup";
+} from "../components/report/ResultParts";
+import { buildReport } from "../lib/report/ipReport";
+import { sourcesFor } from "../lib/search/lookup";
 
 export default function Result() {
   const { ip: rawIp } = useParams();
   const ip = normalizeIp(decodeURIComponent(rawIp || ""));
   const valid = isValidIp(ip);
   const target = useMemo<IpTarget | null>(() => (valid ? { kind: "ip", value: ip } : null), [ip, valid]);
-  // se l'utente ha disattivato tutte le fonti per gli IP non c'è nulla da cercare
+  // if the user turned off all the IP sources there is nothing to look up
   const sources = target ? sourcesFor(target) : [];
   const noSources = !!target && sources.length === 0;
   const { lookup, progress } = useLookup(noSources ? null : target);
@@ -84,8 +84,8 @@ function Report({ report }: { report: IpReport }) {
   const { location, verdict } = report;
   const placeLabel = [location.city, location.region].filter((v, i, a) => v && a.indexOf(v) === i).join(", ");
 
-  // Il riquadro più lungo tra ip-api.com e ProxyCheck.io va a destra; l'altro
-  // sotto la mappa, che si allunga per pareggiare le due colonne.
+  // The longer panel between ip-api.com and ProxyCheck.io goes on the right; the other
+  // below the map, which stretches to even out the two columns.
   const weight = (id: SourceId) => {
     const p = report.panels.find((x) => x.id === id);
     if (!p || p.status === "error") return 2;
@@ -294,7 +294,7 @@ function Operator({ op }: { op: ProxyOperator }) {
 const VULNS_SHOWN = 12;
 
 function Vulnerabilities({ ids }: { ids: string[] }) {
-  // solo testo: il report non contiene link a siti di terzi
+  // text only: the report contains no links to third-party sites
   const item = (id: string) => (
     <li key={id} className="mono">
       {id}
@@ -321,13 +321,13 @@ function Vulnerabilities({ ids }: { ids: string[] }) {
 
 interface CategoriesProps {
   items: { name: string; count: number }[];
-  /** Report ricevuti da AbuseIPDB con il dettaglio, e totale dichiarato per l'IP. */
+  /** Reports received from AbuseIPDB with their detail, and the total declared for the IP. */
   received: number;
   total: number;
 }
 
-// Si mostra solo se l'IP ha report con categorie (il chiamante controlla `items`).
-// Torta e lista sono lo stesso dato: passando sopra una fetta o una riga si evidenzia l'altra.
+// Shown only if the IP has reports with categories (the caller checks `items`).
+// Pie and list are the same data: hovering a slice or a row highlights the other.
 function Categories({ items, received, total }: CategoriesProps) {
   const slices = useMemo(() => pieSlices(items), [items]);
   const legend = useMemo(() => legendFor(slices), [slices]);

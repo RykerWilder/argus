@@ -1,0 +1,103 @@
+---
+# Authelia configuration for Argus (version 4.39).
+#
+# Values that change between installations are not written here: they come from the
+# container's environment variables (docker-compose.yml, .env) and are filled in by
+# Authelia itself (X_AUTHELIA_CONFIG_FILTERS=template, syntax {{ env "NAME" }}).
+# Secrets (session, database encryption, JWT) are read straight from the environment:
+# AUTHELIA_SESSION_SECRET, AUTHELIA_STORAGE_ENCRYPTION_KEY and
+# AUTHELIA_IDENTITY_VALIDATION_RESET_PASSWORD_JWT_SECRET.
+
+theme: 'dark'
+
+server:
+  address: 'tcp://:9091/'
+  endpoints:
+    authz:
+      # nginx uses auth_request, the implementation Authelia recommends for nginx.
+      auth-request:
+        implementation: 'AuthRequest'
+
+log:
+  level: 'info'
+
+authentication_backend:
+  # Passwords are changed from Argus (Settings > Security) or the command line, because the
+  # user store is Argus's SQLite database. The file below is generated from it: a change made
+  # by Authelia would be overwritten, so its password change and reset features are off.
+  password_change:
+    disable: true
+  password_reset:
+    disable: true
+  file:
+    path: '/users/users_database.yml'
+    # Authelia re-reads the file when Argus rewrites it: no restart for new users.
+    watch: true
+    search:
+      email: false
+      # "Alice" and "alice" are the same user.
+      case_insensitive: true
+
+access_control:
+  default_policy: 'deny'
+  rules:
+    # Users who turned on the second factor in Argus (Settings > Security) are in the "mfa"
+    # group and also need the TOTP code or security key. Argus writes the group into the
+    # users file, and Authelia re-reads it on every request.
+    - domain: '{{ env "ARGUS_DOMAIN" }}'
+      subject: 'group:mfa'
+      policy: 'two_factor'
+    - domain: '{{ env "ARGUS_DOMAIN" }}'
+      # one_factor = user and password. two_factor = second factor mandatory for
+      # everyone (ARGUS_AUTH_POLICY, see the README).
+      policy: '{{ env "ARGUS_AUTH_POLICY" }}'
+
+session:
+  name: 'argus_session'
+  same_site: 'lax'
+  inactivity: '2h'
+  expiration: '12h'
+  remember_me: '30d'
+  cookies:
+    - domain: '{{ env "ARGUS_DOMAIN" }}'
+      authelia_url: 'https://auth.{{ env "ARGUS_DOMAIN" }}{{ env "ARGUS_PORT_SUFFIX" }}'
+      default_redirection_url: 'https://{{ env "ARGUS_DOMAIN" }}{{ env "ARGUS_PORT_SUFFIX" }}'
+
+# After 5 failed attempts within 2 minutes the user is blocked for 10 minutes.
+regulation:
+  max_retries: 5
+  find_time: '2m'
+  ban_time: '10m'
+
+storage:
+  local:
+    path: '/data/db.sqlite3'
+
+# Authelia sends a verification code when a user registers a second-factor device. Without
+# a mail server the code is written to a file: data/authelia/notification.txt on the host
+# or, from the container, `docker compose exec authelia cat /data/notification.txt`.
+# With several users an SMTP server is better: replace `filesystem` with
+#   smtp:
+#     address: 'submission://smtp.example.com:587'
+#     username: 'argus@example.com'
+#     sender: 'Argus <argus@example.com>'
+# and pass the password in AUTHELIA_NOTIFIER_SMTP_PASSWORD.
+notifier:
+  filesystem:
+    filename: '/data/notification.txt'
+
+# Second factor: TOTP apps (Google Authenticator, 1Password, Aegis...) and security keys
+# or passkeys (WebAuthn). Duo is not configured.
+totp:
+  issuer: 'Argus'
+
+webauthn:
+  display_name: 'Argus'
+
+# At startup Authelia compares its clock with an NTP server and, if the difference exceeds
+# 3 seconds, usually refuses to start. On Docker Desktop (Mac, Windows) the virtual machine's
+# clock falls behind after the computer sleeps, so here the warning stays in the log
+# but does not block startup.
+ntp:
+  disable_failure: true
+...
